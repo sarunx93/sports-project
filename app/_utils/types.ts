@@ -1,0 +1,15 @@
+export type Sport = 'Badminton' | 'Tennis' | 'Football'
+
+export type User = {
+    userName: string
+    clerkUserId: string
+    clubName: string
+    sports: Sport
+    matches: []
+}
+
+export type CreateUserInput = {
+    userName: string
+    clubName: string
+    sports: Sport
+}
