@@ -15,6 +15,7 @@ export type AuthenticatedUser = {
 export type PersistedUserProfile = {
     userName: string | null
     clubName: string | null
+    email: string | null
     sports: Sport | null
 }
 
@@ -39,6 +40,7 @@ type DatabaseUserLike =
     | {
           userName?: string | null
           clubName?: string | null
+          email?: string | null
           sports?: Sport | null
       }
     | null
@@ -66,6 +68,7 @@ export const defaultUserStoreState: UserStoreState = {
 export const defaultPersistedUserProfile: PersistedUserProfile = {
     userName: null,
     clubName: null,
+    email: null,
     sports: null,
 }
 
@@ -73,6 +76,7 @@ export function normalizeUserProfile(user: DatabaseUserLike): PersistedUserProfi
     return {
         userName: user?.userName ?? null,
         clubName: user?.clubName ?? null,
+        email: user?.email ?? null,
         sports: user?.sports ?? null,
     }
 }

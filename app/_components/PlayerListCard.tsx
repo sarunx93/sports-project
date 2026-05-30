@@ -1,35 +1,42 @@
 import { FaRegPlusSquare, FaRegTrashAlt } from 'react-icons/fa'
-
 import { type Player } from '../_utils/sample-player'
 
 type Props = {
     player: Player
-    handleClick: () => void
+    handleClickAdd: () => void
+    handleClickRemove: () => void
 }
 
-const PlayerListCard = ({ player, handleClick }: Props) => {
+const PlayerListCard = ({ player, handleClickAdd, handleClickRemove }: Props) => {
     return (
-        <div className='flex items-stretch justify-between p-3 rounded-lg border'>
-            <div className='flex items-center gap-3'>
-                <div className='w-10 h-10 flex items-center justify-center rounded-md bg-purple-500 text-white text-sm font-bold mr-2'>
-                    {player.name[0].toUpperCase()}
+        <div className='flex items-center justify-between gap-4 rounded-[22px] border border-[var(--line)] bg-white/78 p-4 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.38)]'>
+            <div className='flex min-w-0 items-center gap-3'>
+                <div className='mr-1 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand)] text-sm font-semibold text-white'>
+                    {player.name.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                    <p className='font-medium text-2xl'>
-                        {player.name} {player.lastName[0]}
+                <div className='min-w-0'>
+                    <p className='truncate text-lg font-semibold text-[var(--foreground)]'>
+                        {player.name} {player.lastName.charAt(0).toUpperCase()}.
                     </p>
-                    <p className='text-md text-gray-500'>Level {player.level}</p>
+                    <p className='mt-2 text-sm text-[var(--muted)]'>Level {player.level.toUpperCase()}</p>
                 </div>
             </div>
-            <div className='flex self-stretch flex-col justify-between py-1'>
-                <button className='block text-xl cursor-pointer my-1' onClick={handleClick}>
+            <div className='flex items-center gap-2'>
+                <button
+                    className='flex h-10 w-10 items-center justify-center rounded-full bg-[var(--success-surface)] text-[var(--foreground)] transition hover:scale-[1.02] hover:bg-[rgba(16,185,129,0.24)]'
+                    onClick={handleClickAdd}
+                    title='Add to team'>
                     <FaRegPlusSquare />
                 </button>
-                <button className='block text-xl cursor-pointer my-1'>
+                <button
+                    className='flex h-10 w-10 items-center justify-center rounded-full bg-[rgba(220,38,38,0.1)] text-[var(--danger)] transition hover:scale-[1.02] hover:bg-[rgba(220,38,38,0.16)]'
+                    onClick={handleClickRemove}
+                    title='Remove player'>
                     <FaRegTrashAlt />
                 </button>
             </div>
         </div>
     )
 }
+
 export default PlayerListCard

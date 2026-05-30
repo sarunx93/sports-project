@@ -1,9 +1,11 @@
 import Hero from './_components/Hero'
+import SportListHome from './_components/SportListHome'
 
 export default function Home() {
     return (
-        <h1 className='text-teal-600'>
+        <main className='pb-20'>
             <Hero />
-        </h1>
+            <SportListHome />
+        </main>
     )
 }

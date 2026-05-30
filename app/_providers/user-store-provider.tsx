@@ -3,6 +3,7 @@
 import { useUser } from '@clerk/nextjs'
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useStore } from 'zustand'
+import { clearPersistedBadmintonState } from '@/app/_stores/badminton-store'
 import {
     createUserStore,
     defaultUserStoreState,
@@ -30,6 +31,7 @@ export function UserStoreProvider({ children, initialState = defaultUserStoreSta
 
         if (!isSignedIn) {
             store.getState().clearCurrentUser()
+            clearPersistedBadmintonState()
             return
         }
 

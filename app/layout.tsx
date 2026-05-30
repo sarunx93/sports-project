@@ -36,11 +36,10 @@ export default async function RootLayout({
 }>) {
     const clerkUser = await currentUser()
     let currentUserProfile = null
-    console.log('clerkUser', clerkUser)
+
     if (clerkUser?.id) {
         await connectMongoose()
         currentUserProfile = await UserModel.findOne({ clerkUserId: clerkUser.id }).lean()
-        console.log(currentUserProfile)
     }
 
     return (

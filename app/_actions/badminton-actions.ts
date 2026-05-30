@@ -1,12 +1,15 @@
 'use server'
 
 import type { EndedMatch } from '@/app/_stores/badminton-store'
+import type { Player } from '@/app/_utils/sample-player'
 import type { PersistedUserProfile } from '@/app/_stores/user-store'
 import type { Sport } from '@/app/_utils/types'
 import { connectMongoose } from '@/app/_lib/mongoose'
+import { validateBadmintonMatch } from '@/app/_utils/badminton-score'
 import MatchModel from '@/models/Match'
 import UserModel from '@/models/User'
 import { auth, currentUser } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
 
 export type RecordMatchResult =
     | {
@@ -29,7 +32,38 @@ export type CreateUserState = {
     }
 }
 
+export type AddPlayerToClubResult =
+    | {
+          ok: true
+          message: string
+      }
+    | {
+          ok: false
+          message: string
+      }
+
 export async function recordMatch(match: EndedMatch): Promise<RecordMatchResult> {
+    const user = await currentUser()
+    const data = {
+        userId: user?.id,
+        name: user?.firstName,
+        email: user?.emailAddresses[0].emailAddress,
+        role: 'player',
+    }
+
+    const validation = validateBadmintonMatch(match.scoreA, match.scoreB)
+
+    if (!validation.ok) {
+        return {
+            ok: false,
+            message:
+                validation.errors.general ??
+                validation.errors.scoreA ??
+                validation.errors.scoreB ??
+                'Invalid badminton match score.',
+        }
+    }
+
     try {
         await connectMongoose()
 
@@ -40,6 +74,10 @@ export async function recordMatch(match: EndedMatch): Promise<RecordMatchResult>
                 B: match.teams.B,
             },
             duration: match.duration,
+            recordedBy: data,
+            scoreA: validation.scoreA,
+            scoreB: validation.scoreB,
+            winner: validation.winner,
         })
 
         return {
@@ -105,7 +143,7 @@ export async function createUser(prevState: CreateUserState, formData: FormData)
 
     const userName =
         clerkUser.firstName ?? clerkUser.fullName ?? clerkUser.primaryEmailAddress?.emailAddress ?? 'Player'
-
+    const email = clerkUser.primaryEmailAddress?.emailAddress?.trim().toLowerCase() ?? null
     await connectMongoose()
 
     // Backfill older user documents that were created before the players field existed.
@@ -118,24 +156,66 @@ export async function createUser(prevState: CreateUserState, formData: FormData)
                 userName,
                 clubName,
                 sports,
+                email,
             },
             $setOnInsert: {
                 clerkUserId: userId,
                 matches: [],
-                players: []
+                players: [],
             },
         },
         { upsert: true, new: true },
     )
-
+    redirect(`/sports/${sports.toLowerCase()}`)
     return {
         ok: true,
         message: 'Club created successfully.',
         userProfile: {
             userName,
             clubName,
+            email,
             sports,
         },
         errors: {},
     }
+}
+
+export async function addPlayersToClub(player: Player, userId: string): Promise<AddPlayerToClubResult> {
+    try {
+        await connectMongoose()
+
+        const result = await UserModel.updateOne(
+            { clerkUserId: userId },
+            {
+                $push: {
+                    players: player,
+                },
+            },
+        )
+
+        if (result.matchedCount === 0) {
+            return {
+                ok: false,
+                message: 'Club not found for this user.',
+            }
+        }
+
+        return {
+            ok: true,
+            message: 'Player added to database.',
+        }
+    } catch (error) {
+        return {
+            ok: false,
+            message: error instanceof Error ? error.message : 'Unknown error while adding player.',
+        }
+    }
+}
+
+export async function getWaitingPlayers(userId: string): Promise<Player[]> {
+    await connectMongoose()
+
+    const user = await UserModel.findOne({ clerkUserId: userId }, { players: 1, _id: 0 }).lean<{ players?: Player[] }>()
+
+    return user?.players ?? []
 }

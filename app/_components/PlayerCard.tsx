@@ -1,6 +1,7 @@
 'use client'
 
 import { useDraggable } from '@dnd-kit/react'
+import { FaRegTrashAlt } from 'react-icons/fa'
 import { type Player } from '../_utils/sample-player'
 
 type TeamName = 'A' | 'B'
@@ -28,31 +29,45 @@ function DraggablePlayerCard({ player, team, slotIndex, onRemove }: DraggablePla
     })
 
     return (
-        <div className='flex w-full items-center justify-between gap-4 p-3 bg-slate-50 rounded-lg shadow-sm' ref={ref}>
+        <div
+            className='group flex w-full items-center gap-3 rounded-[22px] border border-white/80 bg-white/88 p-4 shadow-[0_18px_45px_-35px_rgba(15,23,42,0.45)]'
+            ref={ref}>
+            <div className='cursor-grab select-none text-lg leading-none text-[var(--muted)] transition group-hover:text-[var(--foreground)]'>
+                ⋮⋮
+            </div>
             <PlayerCard player={player} onRemove={onRemove} />
         </div>
     )
 }
-
 export const PlayerCard = ({ player, onRemove }: PlayerCardProps) => {
     return (
-        <>
-            <div className='flex items-center gap-3'>
-                <div className='cursor-grab text-gray-400'>⋮⋮</div>
-                <div className='w-8 h-8 flex items-center justify-center rounded-md bg-blue-500 text-white text-sm font-bold'>
-                    {player.name[0].toUpperCase()}
-                </div>
-                <div>
-                    <p className='font-medium text-2xl'>
-                        {player.name} {player.lastName[0] + '.'}
+        <div className='flex flex-1 items-center justify-between gap-4'>
+            <div className='flex min-w-0 items-center gap-3'>
+                <div className='min-w-0'>
+                    <p className='truncate text-lg font-semibold text-[var(--foreground)]'>
+                        {player.name} {player.lastName.charAt(0).toUpperCase()}.
                     </p>
-                    <p className='text-md text-gray-500'>Level {player.level}</p>
+                    <div className='mt-2 flex flex-wrap items-center gap-2'>
+                        <span className='rounded-full bg-[var(--surface)] text-xs font-medium text-[var(--foreground)]'>
+                            Level {player.level.toUpperCase()}
+                        </span>
+                    </div>
                 </div>
             </div>
-            <button className='text-gray-400 hover:text-red-500' onClick={onRemove}>
-                🗑
-            </button>
-        </>
+            {onRemove ? (
+                <button
+                    className='flex h-10 w-10 items-center justify-center rounded-full text-[var(--muted)] transition hover:bg-[rgba(220,38,38,0.12)] hover:text-[var(--danger)]'
+                    onClick={onRemove}
+                    title='Remove from match'>
+                    <FaRegTrashAlt />
+                </button>
+            ) : (
+                <span className='rounded-full bg-[var(--surface)] px-3 py-1 text-xs font-medium text-[var(--muted)]'>
+                    Ready
+                </span>
+            )}
+        </div>
     )
 }
+
 export default DraggablePlayerCard

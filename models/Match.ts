@@ -26,7 +26,7 @@ const playerSchema = new Schema(
     },
     {
         _id: false,
-    }
+    },
 )
 
 const teamsSchema = new Schema(
@@ -44,7 +44,7 @@ const teamsSchema = new Schema(
     },
     {
         _id: false,
-    }
+    },
 )
 
 const recordedBySchema = new Schema(
@@ -73,7 +73,7 @@ const recordedBySchema = new Schema(
     },
     {
         _id: false,
-    }
+    },
 )
 
 const matchSchema = new Schema(
@@ -97,10 +97,25 @@ const matchSchema = new Schema(
             type: recordedBySchema,
             required: true,
         },
+        scoreA: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        scoreB: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        winner: {
+            type: String,
+            enum: ['A', 'B'],
+            required: true,
+        },
     },
     {
         timestamps: true,
-    }
+    },
 )
 
 export type MatchPlayer = InferSchemaType<typeof playerSchema>

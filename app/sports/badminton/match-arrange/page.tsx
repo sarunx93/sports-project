@@ -3,10 +3,14 @@
 import DraggablePlayerCard from '@/app/_components/PlayerCard'
 import { type Player } from '@/app/_utils/sample-player'
 import { DragDropProvider, useDroppable } from '@dnd-kit/react'
-import PlayerListCard from '@/app/_components/PlayerListCard'
 import { useBadmintonStore } from '@/app/_providers/badminton-store-provider'
 import { type ComponentProps } from 'react'
 import Link from 'next/link'
+import WaitingListBadminton from '@/app/_components/WaitingListBadminton'
+import AddWaitingListBad from '@/app/_components/AddWaitingListBad'
+import Card from '@/app/_components/Card'
+import CardSection from '@/app/_components/CardSection'
+import { buttonClasses } from '@/app/_components/Button'
 
 type TeamName = 'A' | 'B'
 
@@ -47,10 +51,10 @@ const Page = () => {
     const teamA = useBadmintonStore((s) => s.teams.A)
     const teamB = useBadmintonStore((s) => s.teams.B)
 
-    const addPlayerToTeam = useBadmintonStore((s) => s.addPlayerToTeam)
     const swapPlayers = useBadmintonStore((s) => s.swapPlayers)
     const removePlayerFromMatch = useBadmintonStore((s) => s.removePlayerFromMatch)
     const startMatch = useBadmintonStore((s) => s.startMatch)
+    const isMatchReady = teamA.length === 2 && teamB.length === 2
 
     const handleDragEnd: DragEndHandler = (event) => {
         const source = event.operation.source
@@ -66,78 +70,124 @@ const Page = () => {
     }
 
     return (
-        <div className='h-full bg-slate-50 p-6'>
-            <div className='mx-auto flex h-full max-w-7xl gap-6 min-h-0'>
-                <div className='w-1/3'>
-                    <div className='flex h-full min-h-0 flex-col gap-4 rounded-xl bg-white p-4 drop-shadow-lg'>
-                        <h2 className='text-xl font-semibold'>Waiting List</h2>
-                        {/* Player List */}
+        <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6'>
+            <CardSection
+                eyebrow='Badminton Workspace'
+                title='Build the next doubles match.'
+                description='Use the waiting list on the left, place players into teams, and start the match once both sides are full.'
+                actions={
+                    <Link
+                        href='/sports/badminton/all-matches'
+                        className={buttonClasses({ variant: 'secondary', size: 'sm' })}>
+                        See all matches
+                    </Link>
+                }>
+                {/* <div className='grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]'> */}
+                <div>
+                    <div className='grid grid-cols-2 gap-6 justify-center mb-4'>
+                        <AddWaitingListBad />
+                        <WaitingListBadminton />
+                    </div>
 
-                        <div className='flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto'>
-                            {/* use data to render here */}
-                            {waitingList.map((player) => (
-                                <PlayerListCard
-                                    key={player.id}
-                                    player={player}
-                                    handleClick={() => addPlayerToTeam(player)}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-                <div className='flex-1'>
-                    <DragDropProvider onDragEnd={handleDragEnd}>
-                        <div className='bg-white rounded-xl drop-shadow-lg p-4 flex flex-col gap-4'>
-                            <h2 className='text-xl font-semibold'>Match Arrangement</h2>
-                            {/* Teams */}
-                            <div className='flex flex-col gap-6'>
-                                {/* Team A */}
-                                <div className='flex flex-col gap-3 bg-emerald-300 p-4 rounded-xl drop-shadow-lg'>
-                                    <h3 className='font-semibold'>Team A</h3>
-                                    <div className='grid grid-cols-2 gap-4'>
-                                        {teamA?.map((player, index) => (
-                                            <DroppablePlayerSlot
-                                                key={player.id}
-                                                player={player}
-                                                team='A'
-                                                slotIndex={index}
-                                                onRemove={() => removePlayerFromMatch(player)}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                                {/* Team B */}
-                                <div className='flex flex-col gap-3 bg-amber-300 p-4 rounded-xl drop-shadow-lg'>
-                                    <h3 className='font-semibold'>Team B</h3>
-                                    <div className='grid grid-cols-2 gap-4'>
-                                        {teamB?.map((player, index) => (
-                                            <DroppablePlayerSlot
-                                                key={player.id}
-                                                player={player}
-                                                team='B'
-                                                slotIndex={index}
-                                                onRemove={() => removePlayerFromMatch(player)}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
+                    <Card tone='default' padding='lg' className='min-h-128'>
+                        <div className='mb-6 flex flex-col gap-4 rounded-3xl border border-dashed border-(--line) bg-(--surface) p-5 lg:flex-row lg:items-center lg:justify-between'>
+                            <div>
+                                <p className='text-sm font-medium text-foreground'>Current setup</p>
+                                <p className='mt-1 text-sm text-(--muted)'>
+                                    {waitingList.length} waiting, {teamA.length + teamB.length} placed into teams
+                                </p>
                             </div>
-                            <div className='flex justify-center'>
-                                <button
-                                    className='bg-blue-600 text-white px-6 py-3 rounded-lg cursor-pointer hover:bg-blue-400'
-                                    onClick={() => startMatch(teamA, teamB)}>
-                                    ▶ Start Match
-                                </button>
+                            <div className='flex flex-wrap gap-2'>
+                                <span className='rounded-full bg-(--success-surface) px-3 py-1 text-xs font-medium text-foreground'>
+                                    Team A: {teamA.length}/2
+                                </span>
+                                <span className='rounded-full bg-(--warning-surface) px-3 py-1 text-xs font-medium text-foreground'>
+                                    Team B: {teamB.length}/2
+                                </span>
                             </div>
                         </div>
-                    </DragDropProvider>
-                    <div className='flex justify-center mt-8'>
-                        <button className=' cursor-pointer bg-emerald-600 px-6 py-3 rounded-lg text-white hover:bg-emerald-500'>
-                            <Link href='/sports/badminton/all-matches'>See All Matches</Link>
-                        </button>
-                    </div>
+
+                        <DragDropProvider onDragEnd={handleDragEnd}>
+                            <div className='grid gap-6 xl:grid-cols-2'>
+                                {[
+                                    {
+                                        team: 'A' as const,
+                                        title: 'Team A',
+                                        tone: 'success' as const,
+                                        players: teamA,
+                                    },
+                                    {
+                                        team: 'B' as const,
+                                        title: 'Team B',
+                                        tone: 'warning' as const,
+                                        players: teamB,
+                                    },
+                                ].map((team) => (
+                                    <Card key={team.team} tone={team.tone} padding='md' className='h-full'>
+                                        <div className='flex items-center justify-between gap-4'>
+                                            <div>
+                                                <h3 className='text-xl font-semibold text-foreground'>{team.title}</h3>
+                                                <p className='mt-1 text-sm text-(--muted)'>
+                                                    Drag placed players to swap positions.
+                                                </p>
+                                            </div>
+                                            <span className='rounded-full border border-white/80 bg-white/72 px-3 py-1 text-xs font-medium text-foreground'>
+                                                {team.players.length}/2 players
+                                            </span>
+                                        </div>
+
+                                        <div className='mt-5 grid gap-4 sm:grid-cols-2'>
+                                            {Array.from({ length: 2 }, (_, index) => {
+                                                const player = team.players[index]
+
+                                                if (!player) {
+                                                    return (
+                                                        <div
+                                                            key={`${team.team}-empty-${index}`}
+                                                            className='flex min-h-32 items-center justify-center rounded-[22px] border border-dashed border-[var(--line)] bg-white/55 p-5 text-center text-sm leading-6 text-[var(--muted)]'>
+                                                            Add a player from the waiting list
+                                                        </div>
+                                                    )
+                                                }
+
+                                                return (
+                                                    <DroppablePlayerSlot
+                                                        key={player.id}
+                                                        player={player}
+                                                        team={team.team}
+                                                        slotIndex={index}
+                                                        onRemove={() => removePlayerFromMatch(player)}
+                                                    />
+                                                )
+                                            })}
+                                        </div>
+                                    </Card>
+                                ))}
+                            </div>
+                        </DragDropProvider>
+
+                        <div className='mt-8 flex flex-col gap-4 rounded-[24px] border border-white/80 bg-[var(--surface)] p-5 sm:flex-row sm:items-center sm:justify-between'>
+                            <div>
+                                <p className='text-lg font-semibold text-[var(--foreground)]'>
+                                    {isMatchReady ? 'Ready to start the match.' : 'Each team needs two players.'}
+                                </p>
+                                <p className='mt-1 text-sm text-[var(--muted)]'>
+                                    The start action stays disabled until the match is fully staffed.
+                                </p>
+                            </div>
+                            <button
+                                className={buttonClasses({
+                                    size: 'lg',
+                                    className: !isMatchReady ? 'pointer-events-none' : '',
+                                })}
+                                disabled={!isMatchReady}
+                                onClick={() => startMatch(teamA, teamB, 'doubles')}>
+                                Start Match
+                            </button>
+                        </div>
+                    </Card>
                 </div>
-            </div>
+            </CardSection>
         </div>
     )
 }

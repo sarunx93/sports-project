@@ -35,6 +35,11 @@ const userSchema = new Schema({
         required: true,
         trim: true,
     },
+    email: {
+        type: String,
+        required: true,
+        trim: true,
+    },
     clerkUserId: {
         type: String,
         required: true,

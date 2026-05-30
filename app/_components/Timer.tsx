@@ -1,77 +1,66 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
-import { PlayingMatches } from '../_stores/badminton-store'
+
+import { useEffect, useState } from 'react'
+import { DEFAULT_MATCH_TIMER_STATE, getElapsedMatchTimerMs, type PlayingMatches } from '../_stores/badminton-store'
 import { useBadmintonStore } from '../_providers/badminton-store-provider'
 import { recordMatch } from '../_actions/badminton-actions'
-
-type Status = 'idle' | 'running' | 'paused'
+import ScoreModal from './ScoreModal'
+import type { ValidatedBadmintonMatch } from '../_utils/badminton-score'
+import Button from './Button'
 
 type TimerProps = {
     match: PlayingMatches
 }
 
+const formatTime = (seconds: number): string => {
+    const hrs = Math.floor(seconds / 3600)
+    const mins = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+
+    if (hrs > 0) {
+        return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+    }
+
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+}
+
 const Timer = ({ match }: TimerProps) => {
     const endMatch = useBadmintonStore((s) => s.endMatch)
+    const timer = useBadmintonStore((s) => s.matchTimers[match.id] ?? DEFAULT_MATCH_TIMER_STATE)
+    const startTimer = useBadmintonStore((s) => s.startTimer)
+    const pauseTimer = useBadmintonStore((s) => s.pauseTimer)
+    const resumeTimer = useBadmintonStore((s) => s.resumeTimer)
+    const resetTimer = useBadmintonStore((s) => s.resetTimer)
 
-    const [status, setStatus] = useState<Status>('idle')
-    const [elapsedTime, setElapsedTime] = useState<number>(0)
-    const [startedAt, setStartedAt] = useState<number | null>(null)
-    const [accumulatedTime, setAccumulatedTime] = useState(0)
+    const [, setTick] = useState(0)
     const [isSaving, setIsSaving] = useState(false)
     const [saveMessage, setSaveMessage] = useState<string | null>(null)
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+    const [scoreA, setScoreA] = useState('')
+    const [scoreB, setScoreB] = useState('')
 
-    const intervalRef = useRef<number | null>(null)
-
-    const clearTimer = () => {
-        if (intervalRef.current !== null) {
-            clearInterval(intervalRef.current)
-            intervalRef.current = null
-        }
-    }
-
-    const run = () => {
-        const start = Date.now()
-        setStartedAt(start)
-        setStatus('running')
-
-        intervalRef.current = window.setInterval(() => {
-            const elapsed = Math.floor((Date.now() - start) / 1000)
-            setElapsedTime(accumulatedTime + elapsed)
-        }, 1000)
-    }
+    const elapsedTime = Math.floor(getElapsedMatchTimerMs(timer) / 1000)
 
     const handleStart = () => {
-        if (status === 'running') return
-        run()
+        if (timer.status === 'running') return
+        startTimer(match.id)
     }
 
     const handlePause = () => {
-        if (status !== 'running' || startedAt === null) return
-
-        // eslint-disable-next-line react-hooks/purity
-        const elapsed = Math.floor((Date.now() - startedAt) / 1000)
-        const total = accumulatedTime + elapsed
-
-        clearTimer()
-        setAccumulatedTime(total)
-        setElapsedTime(total)
-        setStatus('paused')
+        pauseTimer(match.id)
     }
 
     const handleResume = () => {
-        if (status !== 'paused') return
-        run()
+        if (timer.status !== 'paused') return
+        resumeTimer(match.id)
     }
 
     const handleReset = () => {
-        clearTimer()
-        setStatus('idle')
-        setElapsedTime(0)
-        setAccumulatedTime(0)
-        setStartedAt(null)
+        resetTimer(match.id)
         setSaveMessage(null)
     }
-    const handleFinish = async () => {
+
+    const handleFinish = async (validatedMatch: ValidatedBadmintonMatch) => {
         if (isSaving) return
 
         const duration = formatTime(elapsedTime)
@@ -79,7 +68,13 @@ const Timer = ({ match }: TimerProps) => {
         setIsSaving(true)
         setSaveMessage(null)
 
-        const result = await recordMatch({ ...match, duration })
+        const result = await recordMatch({
+            ...match,
+            duration,
+            scoreA: validatedMatch.scoreA,
+            scoreB: validatedMatch.scoreB,
+            winner: validatedMatch.winner,
+        })
 
         if (!result.ok) {
             setIsSaving(false)
@@ -87,65 +82,105 @@ const Timer = ({ match }: TimerProps) => {
             return
         }
 
-        endMatch(match, duration)
-        clearTimer()
-        setElapsedTime(0)
-        setAccumulatedTime(0)
-        setStartedAt(null)
-        setStatus('idle')
+        endMatch(match, {
+            duration,
+            scoreA: validatedMatch.scoreA,
+            scoreB: validatedMatch.scoreB,
+            winner: validatedMatch.winner,
+        })
+        setScoreA('')
+        setScoreB('')
+        setIsModalOpen(false)
         setIsSaving(false)
-        setSaveMessage(result.message)
-    }
-    const formatTime = (seconds: number): string => {
-        const hrs = Math.floor(seconds / 3600)
-        const mins = Math.floor((seconds % 3600) / 60)
-        const secs = seconds % 60
-
-        if (hrs > 0) {
-            return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-        }
-        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
     }
 
     useEffect(() => {
-        return () => clearTimer()
-    }, [])
+        if (timer.status !== 'running') {
+            return
+        }
+
+        const intervalId = window.setInterval(() => {
+            setTick((t) => t + 1)
+        }, 1000)
+
+        return () => clearInterval(intervalId)
+    }, [timer.startedAt, timer.status])
+
+    const statusLabel =
+        timer.status === 'idle' ? 'Not started' : timer.status === 'running' ? 'Match running' : 'Paused'
 
     return (
-        <div>
-            <div className='mt-4 text-3xl font-bold tabular-nums'>{formatTime(elapsedTime)}</div>
-            {/* <div className='mt-2 text-sm text-gray-500'>
-                Status: <span className='font-medium'>{status}</span>
-            </div> */}
-            <div className='mt-2 flex gap-3'>
-                {status === 'idle' && (
-                    <button onClick={handleStart} className='bg-blue-600 text-white px-4 py-1 rounded-lg'>
-                        Start
-                    </button>
-                )}
-                {status === 'running' && (
-                    <button onClick={handlePause} className='bg-amber-500 text-white px-4 py-1 rounded-lg'>
-                        Pause
-                    </button>
-                )}
-                {status === 'paused' && (
-                    <button onClick={handleResume} className='bg-green-500 text-white px-4 py-1 rounded-lg'>
-                        Resume
-                    </button>
-                )}
-                <button onClick={handleReset} className='border px-4 py-1 rounded-lg'>
-                    Reset
-                </button>
-                <button
-                    disabled={isSaving}
-                    onClick={handleFinish}
-                    className='bg-emerald-600 text-white border px-4 py-1 rounded-lg disabled:cursor-not-allowed disabled:bg-emerald-300'>
-                    {isSaving ? 'Saving...' : 'Finish'}
-                </button>
+        <div className='rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-5 w-85'>
+            <div className='flex flex-wrap items-start justify-between gap-4'>
+                <div>
+                    <p className='text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]'>Timer</p>
+                    <div className='mt-2 text-4xl font-semibold tabular-nums text-[var(--foreground)]'>
+                        {formatTime(elapsedTime)}
+                    </div>
+                </div>
+                <span className='rounded-full bg-white/88 px-3 py-1 text-xs font-medium text-[var(--foreground)]'>
+                    {statusLabel}
+                </span>
             </div>
 
-            {saveMessage ? <p className='mt-3 text-sm text-slate-600'>{saveMessage}</p> : null}
+            <div className='mt-4 flex flex-wrap gap-3'>
+                {timer.status === 'idle' && (
+                    <Button onClick={handleStart} className='w-full'>
+                        Start
+                    </Button>
+                )}
+                {timer.status === 'running' && (
+                    <>
+                        <Button variant='secondary' className='bg-emerald-600 blac' onClick={handlePause}>
+                            Pause
+                        </Button>
+                        <Button variant='ghost' className='border border-(--line) bg-white/72' onClick={handleReset}>
+                            Reset
+                        </Button>
+                        <Button
+                            disabled={isSaving}
+                            onClick={() => setIsModalOpen(true)}
+                            variant='secondary'
+                            className='bg-foreground black hover:bg-[rgba(18,32,51,0.92)]'>
+                            {isSaving ? 'Saving...' : 'Finish'}
+                        </Button>
+                    </>
+                )}
+                {timer.status === 'paused' && (
+                    <>
+                        <Button
+                            variant='secondary'
+                            className='bg-emerald-600 black cursor-pointer'
+                            onClick={handleResume}>
+                            Resume
+                        </Button>
+                        <Button variant='ghost' className='border border-(--line) bg-white/72' onClick={handleReset}>
+                            Reset
+                        </Button>
+                        <Button
+                            disabled={isSaving}
+                            onClick={() => setIsModalOpen(true)}
+                            variant='secondary'
+                            className='bg-foreground black hover:bg-[rgba(18,32,51,0.92)]'>
+                            {isSaving ? 'Saving...' : 'Finish'}
+                        </Button>
+                    </>
+                )}
+            </div>
+
+            {saveMessage ? <p className='mt-4 text-sm text-[var(--muted)]'>{saveMessage}</p> : null}
+
+            <ScoreModal
+                isOpen={isModalOpen}
+                onSetA={setScoreA}
+                onSetB={setScoreB}
+                onConfirm={handleFinish}
+                onCancel={() => setIsModalOpen(false)}
+                scoreA={scoreA}
+                scoreB={scoreB}
+            />
         </div>
     )
 }
+
 export default Timer

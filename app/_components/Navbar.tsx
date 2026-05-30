@@ -3,66 +3,88 @@
 import Link from 'next/link'
 import { SignInButton, UserButton } from '@clerk/nextjs'
 import { useUserStore } from '../_providers/user-store-provider'
+import { buttonClasses } from './Button'
 
 const Navbar = () => {
     const currentUser = useUserStore((state) => state.currentUser)
+    const navLinks = [
+        { href: '/', label: 'Home' },
+        { href: '/sports/badminton', label: 'Badminton' },
+        { href: '/sports/tennis', label: 'Tennis' },
+        { href: '/sports/football', label: 'Football' },
+        { href: '/register', label: 'Club Setup' },
+    ]
+
+    const preferredSportHref =
+        currentUser?.sports === 'Badminton'
+            ? '/sports/badminton'
+            : currentUser?.sports === 'Tennis'
+              ? '/sports/tennis'
+              : '/register'
 
     return (
-        <nav className='border-b border-gray-200 bg-white shadow-sm'>
-            <div className='mx-auto flex max-w-7xl items-center justify-between px-6 py-4'>
-                <Link href='/' className='text-xl font-bold text-gray-900'>
-                    Logo
-                </Link>
-
-                {/* Desktop Menu */}
-                <ul className='hidden items-center gap-8 text-sm font-medium text-gray-700 md:flex'>
-                    <li>
-                        <Link href='/' className='transition hover:text-blue-600'>
-                            Home
-                        </Link>
-                    </li>
-                    {/* hover item */}
-                    <li className='group relative'>
-                        <Link href='' className='inline-flex items-center gap-1 transition hover:text-blue-600'>
-                            Sports
-                            <span className='text-xs'>▼</span>
-                        </Link>
-                        <div className='absolute left-0 top-full hidden pt-2 group-hover:block z-9999'>
-                            <div className='min-w-45 rounded-lg border border-gray-100 bg-white py-2 shadow-lg'>
-                                <Link href='/sports/badminton' className='block px-4 py-2 text-sm hover:bg-gray-100'>
-                                    Badminton
-                                </Link>
-                                <Link href='/sports/tennis' className='block px-4 py-2 text-sm hover:bg-gray-100'>
-                                    Tennis
-                                </Link>
-                                <Link href='/sports/soccer' className='block px-4 py-2 text-sm hover:bg-gray-100'>
-                                    Soccer
-                                </Link>
-                            </div>
+        <nav className='sticky top-0 z-50 border-b border-white/70 bg-[rgba(245,239,231,0.78)] backdrop-blur-xl'>
+            <div className='mx-auto max-w-7xl px-4 sm:px-6'>
+                <div className='flex min-h-[4.5rem] items-center justify-between gap-4'>
+                    <Link href='/' className='flex items-center gap-3'>
+                        <span className='flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand)] text-sm font-semibold text-white'>
+                            SB
+                        </span>
+                        <div>
+                            <p className='text-lg font-semibold tracking-tight text-[var(--foreground)]'>Match Desk</p>
+                            <p className='text-xs uppercase tracking-[0.22em] text-[var(--muted)]'>Organize Neatly</p>
                         </div>
-                    </li>
-                    <li>
-                        <Link href='/contact' className='transition hove:text-blue-600'>
-                            Contact
-                        </Link>
-                    </li>
-                </ul>
+                    </Link>
 
-                <div className='flex items-center gap-3'>
-                    {currentUser ? (
-                        <>
-                            <span className='hidden text-sm font-medium text-gray-700 md:block'>
-                                {currentUser.displayName}
-                            </span>
-                            <UserButton />
-                        </>
-                    ) : (
-                        <SignInButton mode='modal' forceRedirectUrl='/register'>
-                            <button className='rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700'>
-                                Sign in
-                            </button>
-                        </SignInButton>
-                    )}
+                    <ul className='hidden items-center gap-2 md:flex'>
+                        {navLinks.map((link) => (
+                            <li key={link.href}>
+                                <Link
+                                    href={link.href}
+                                    className='rounded-full px-4 py-2 text-sm font-medium text-[var(--muted)] transition hover:bg-white/80 hover:text-[var(--foreground)]'>
+                                    {link.label}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+
+                    <div className='flex items-center gap-3'>
+                        {currentUser ? (
+                            <>
+                                <Link
+                                    href={preferredSportHref}
+                                    className={buttonClasses({ variant: 'secondary', size: 'sm' })}>
+                                    Dashboard
+                                </Link>
+                                <div className='hidden text-right md:block'>
+                                    <p className='text-sm font-medium text-[var(--foreground)]'>
+                                        {currentUser.displayName}
+                                    </p>
+                                    <p className='text-xs text-[var(--muted)]'>
+                                        {currentUser.clubName ? currentUser.clubName : 'No club set yet'}
+                                    </p>
+                                </div>
+                                <UserButton />
+                            </>
+                        ) : (
+                            <SignInButton mode='modal' forceRedirectUrl='/register'>
+                                <button type='button' className={buttonClasses({ size: 'sm' })}>
+                                    Sign in
+                                </button>
+                            </SignInButton>
+                        )}
+                    </div>
+                </div>
+
+                <div className='flex gap-2 overflow-x-auto pb-4 md:hidden'>
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            className='whitespace-nowrap rounded-full border border-white/70 bg-white/72 px-4 py-2 text-sm font-medium text-[var(--foreground)] shadow-[0_12px_35px_-28px_rgba(15,23,42,0.5)]'>
+                            {link.label}
+                        </Link>
+                    ))}
                 </div>
             </div>
         </nav>

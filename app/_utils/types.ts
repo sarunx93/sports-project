@@ -4,6 +4,7 @@ export type User = {
     userName: string
     clerkUserId: string
     clubName: string
+    email: string | null
     sports: Sport
     matches: []
 }

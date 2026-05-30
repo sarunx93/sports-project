@@ -2,7 +2,7 @@ import ClubInput from '../_components/ClubInput'
 
 const Register = () => {
     return (
-        <div className='h-full p-10'>
+        <div className='mx-auto max-w-7xl px-4 py-10 sm:px-6'>
             <ClubInput />
         </div>
     )
