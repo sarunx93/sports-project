@@ -4,13 +4,14 @@ import DraggablePlayerCard from '@/app/_components/PlayerCard'
 import { type Player } from '@/app/_utils/sample-player'
 import { DragDropProvider, useDroppable } from '@dnd-kit/react'
 import { useBadmintonStore } from '@/app/_providers/badminton-store-provider'
-import { type ComponentProps } from 'react'
+import { useState, type ComponentProps } from 'react'
 import Link from 'next/link'
 import WaitingListBadminton from '@/app/_components/WaitingListBadminton'
 import AddWaitingListBad from '@/app/_components/AddWaitingListBad'
 import Card from '@/app/_components/Card'
 import CardSection from '@/app/_components/CardSection'
 import { buttonClasses } from '@/app/_components/Button'
+import { boolean } from 'better-auth'
 
 type TeamName = 'A' | 'B'
 
@@ -50,11 +51,21 @@ const Page = () => {
     const waitingList = useBadmintonStore((s) => s.waitingList)
     const teamA = useBadmintonStore((s) => s.teams.A)
     const teamB = useBadmintonStore((s) => s.teams.B)
+    const matchType = useBadmintonStore((s) => s.matchTypes)
 
     const swapPlayers = useBadmintonStore((s) => s.swapPlayers)
     const removePlayerFromMatch = useBadmintonStore((s) => s.removePlayerFromMatch)
     const startMatch = useBadmintonStore((s) => s.startMatch)
+    const setMatchType = useBadmintonStore((s) => s.setMatchType)
     const isMatchReady = teamA.length === 2 && teamB.length === 2
+
+    const [isSingles, setIsSingles] = useState<boolean>(false)
+
+    const handleToggle = () => {
+        setIsSingles((prev) => !prev)
+        setMatchType(isSingles ? 'singles' : 'doubles')
+    }
+    console.log(matchType)
 
     const handleDragEnd: DragEndHandler = (event) => {
         const source = event.operation.source
@@ -93,11 +104,15 @@ const Page = () => {
                         <div className='mb-6 flex flex-col gap-4 rounded-3xl border border-dashed border-(--line) bg-(--surface) p-5 lg:flex-row lg:items-center lg:justify-between'>
                             <div>
                                 <p className='text-sm font-medium text-foreground'>Current setup</p>
+
                                 <p className='mt-1 text-sm text-(--muted)'>
                                     {waitingList.length} waiting, {teamA.length + teamB.length} placed into teams
                                 </p>
                             </div>
                             <div className='flex flex-wrap gap-2'>
+                                <button className='border-2 cursor-pointer' onClick={handleToggle}>
+                                    {matchType === 'doubles' ? 'Doubles' : 'Singles'}
+                                </button>
                                 <span className='rounded-full bg-(--success-surface) px-3 py-1 text-xs font-medium text-foreground'>
                                     Team A: {teamA.length}/2
                                 </span>

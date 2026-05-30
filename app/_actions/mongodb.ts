@@ -1,5 +1,4 @@
 'use server'
-
 import { getDatabase } from '@/app/_lib/mongodb'
 
 export type MongoConnectionResult =

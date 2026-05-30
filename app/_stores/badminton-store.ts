@@ -5,7 +5,7 @@ import type { MatchWinner } from '../_utils/badminton-score'
 
 export const BADMINTON_STORE_STORAGE_KEY = 'badminton-store'
 
-type MatchTypes = 'singles' | 'doubles'
+export type MatchTypes = 'singles' | 'doubles'
 
 type PersistedBadmintonStore = {
     state?: Partial<MatchArrangeState>
@@ -50,6 +50,7 @@ type MatchArrangeState = {
     playingMatches: PlayingMatches[]
     endedMatches: EndedMatch[]
     matchTimers: Record<number, MatchTimerState>
+    matchTypes: MatchTypes
 }
 
 type MatchArrangeActions = {
@@ -65,6 +66,7 @@ type MatchArrangeActions = {
     pauseTimer: (matchId: number) => void
     resumeTimer: (matchId: number) => void
     resetTimer: (matchId: number) => void
+    setMatchType: (matchTypeInput: MatchTypes) => void
 }
 
 export type MatchArrangeStore = MatchArrangeState & MatchArrangeActions
@@ -83,7 +85,12 @@ function createDefaultMatchArrangeState(initialWaitingList: Player[] = []): Matc
         playingMatches: [],
         endedMatches: [],
         matchTimers: {},
+        matchTypes: 'doubles',
     }
+}
+
+function getPlayersPerTeam(matchType: MatchTypes) {
+    return matchType === 'singles' ? 1 : 2
 }
 
 function getNextPlayerId(state: MatchArrangeState) {
@@ -163,6 +170,30 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                     set((state) => ({
                         waitingList: state.waitingList.filter((p) => p.id !== player.id),
                     })),
+                setMatchType: (matchTypeInput: MatchTypes) =>
+                    set((state) => {
+                        if (state.matchTypes === matchTypeInput) {
+                            return state
+                        }
+
+                        const playersPerTeam = getPlayersPerTeam(matchTypeInput)
+                        const nextTeamA = state.teams.A.slice(0, playersPerTeam)
+                        const nextTeamB = state.teams.B.slice(0, playersPerTeam)
+                        const overflowPlayers = [
+                            ...state.teams.A.slice(playersPerTeam),
+                            ...state.teams.B.slice(playersPerTeam),
+                        ]
+
+                        return {
+                            ...state,
+                            waitingList: [...overflowPlayers, ...state.waitingList],
+                            teams: {
+                                A: nextTeamA,
+                                B: nextTeamB,
+                            },
+                            matchTypes: matchTypeInput,
+                        }
+                    }),
                 removeAllPlayersFromWaitingList: () =>
                     set((state) => ({
                         ...state,
@@ -195,7 +226,6 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                         if (!timer || timer.status !== 'running' || timer.startedAt === null) {
                             return state
                         }
-                        console.log(state.matchTimers)
                         return {
                             ...state,
                             matchTimers: {
@@ -250,7 +280,9 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                             return state
                         }
 
-                        if (state.teams.A.length < 2) {
+                        const playersPerTeam = getPlayersPerTeam(state.matchTypes)
+                        console.log('playersPerTeam', playersPerTeam)
+                        if (state.teams.A.length < playersPerTeam) {
                             return {
                                 waitingList: state.waitingList.filter((p) => p.id !== player.id),
                                 teams: {
@@ -260,7 +292,7 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                             }
                         }
 
-                        if (state.teams.B.length < 2) {
+                        if (state.teams.B.length < playersPerTeam) {
                             return {
                                 waitingList: state.waitingList.filter((p) => p.id !== player.id),
                                 teams: {
@@ -380,6 +412,7 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                     playingMatches: state.playingMatches,
                     endedMatches: state.endedMatches,
                     matchTimers: state.matchTimers,
+                    matchTypes: state.matchTypes,
                 }),
                 skipHydration: true,
             },
