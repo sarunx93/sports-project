@@ -2,7 +2,7 @@
 
 import { useDraggable } from '@dnd-kit/react'
 import { FaRegTrashAlt } from 'react-icons/fa'
-import { type Player } from '../_utils/sample-player'
+import { type Player } from '../_utils/constants'
 
 type TeamName = 'A' | 'B'
 

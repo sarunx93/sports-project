@@ -1,9 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { SignInButton, UserButton } from '@clerk/nextjs'
 import { useUserStore } from '../_providers/user-store-provider'
 import { buttonClasses } from './Button'
+import logo from '@/public/sports_logo.png'
 
 const Navbar = () => {
     const currentUser = useUserStore((state) => state.currentUser)
@@ -25,14 +27,17 @@ const Navbar = () => {
     return (
         <nav className='sticky top-0 z-50 border-b border-white/70 bg-[rgba(245,239,231,0.78)] backdrop-blur-xl'>
             <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-                <div className='flex min-h-[4.5rem] items-center justify-between gap-4'>
+                <div className='flex min-h-18 items-center justify-between gap-4'>
                     <Link href='/' className='flex items-center gap-3'>
-                        <span className='flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand)] text-sm font-semibold text-white'>
-                            SB
-                        </span>
+                        <Image
+                            src={logo}
+                            alt={'app logo'}
+                            className='flex h-15 w-15 items-center justify-center rounded-full'
+                        />
+
                         <div>
-                            <p className='text-lg font-semibold tracking-tight text-[var(--foreground)]'>Match Desk</p>
-                            <p className='text-xs uppercase tracking-[0.22em] text-[var(--muted)]'>Organize Neatly</p>
+                            <p className='text-lg font-semibold tracking-tight text-foreground'>Match Desk</p>
+                            <p className='text-xs uppercase tracking-[0.22em] text-(--muted)'>Organize Neatly</p>
                         </div>
                     </Link>
 
@@ -41,7 +46,7 @@ const Navbar = () => {
                             <li key={link.href}>
                                 <Link
                                     href={link.href}
-                                    className='rounded-full px-4 py-2 text-sm font-medium text-[var(--muted)] transition hover:bg-white/80 hover:text-[var(--foreground)]'>
+                                    className='rounded-full px-4 py-2 text-sm font-medium text-(--muted) transition hover:bg-white/80 hover:text-foreground'>
                                     {link.label}
                                 </Link>
                             </li>
@@ -57,10 +62,10 @@ const Navbar = () => {
                                     Dashboard
                                 </Link>
                                 <div className='hidden text-right md:block'>
-                                    <p className='text-sm font-medium text-[var(--foreground)]'>
+                                    <p className='text-sm font-medium text-foreground'>
                                         {currentUser.displayName}
                                     </p>
-                                    <p className='text-xs text-[var(--muted)]'>
+                                    <p className='text-xs text-(--muted)'>
                                         {currentUser.clubName ? currentUser.clubName : 'No club set yet'}
                                     </p>
                                 </div>
@@ -81,7 +86,7 @@ const Navbar = () => {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className='whitespace-nowrap rounded-full border border-white/70 bg-white/72 px-4 py-2 text-sm font-medium text-[var(--foreground)] shadow-[0_12px_35px_-28px_rgba(15,23,42,0.5)]'>
+                            className='whitespace-nowrap rounded-full border border-white/70 bg-white/72 px-4 py-2 text-sm font-medium text-foreground shadow-[0_12px_35px_-28px_rgba(15,23,42,0.5)]'>
                             {link.label}
                         </Link>
                     ))}

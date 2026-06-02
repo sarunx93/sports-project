@@ -1,7 +1,8 @@
 import { createStore } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import { type Player } from '../_utils/sample-player'
+import { type Player } from '../_utils/constants'
 import type { MatchWinner } from '../_utils/badminton-score'
+import { v4 as uuidv4 } from 'uuid'
 
 export const BADMINTON_STORE_STORAGE_KEY = 'badminton-store'
 
@@ -16,12 +17,13 @@ type TeamName = 'A' | 'B'
 type TeamPlayers = Record<TeamName, Player[]>
 
 export type PlayingMatches = {
-    id: number
+    id: string
     teams: TeamPlayers
     type?: MatchTypes
+    matchNumber: number
 }
 
-export type EndedMatch = PlayingMatches & { duration: string; scoreA: string; scoreB: string; winner: MatchWinner }
+export type EndedMatch = PlayingMatches & { duration: string; scoreA?: string; scoreB?: string; winner: MatchWinner }
 
 type NewPlayerInput = Omit<Player, 'id'>
 
@@ -346,13 +348,10 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                     }),
                 startMatch: (teamA: Player[], teamB: Player[], type: MatchTypes) =>
                     set((state) => {
-                        const matchId =
-                            Math.max(
-                                0,
-                                ...state.playingMatches.map((match) => match.id),
-                                ...state.endedMatches.map((match) => match.id),
-                            ) + 1
+                        const matchId = uuidv4()
 
+                        const matchNumber = Math.max(0, state.playingMatches.length) + 1
+                        console.log(matchNumber)
                         return {
                             ...state,
                             teams: { A: [], B: [] },
@@ -365,6 +364,7 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                                         B: [...teamB],
                                     },
                                     type,
+                                    matchNumber,
                                 },
                             ],
                             matchTimers: {

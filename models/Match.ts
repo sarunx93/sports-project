@@ -79,7 +79,7 @@ const recordedBySchema = new Schema(
 const matchSchema = new Schema(
     {
         id: {
-            type: Number,
+            type: String,
             required: true,
             unique: true,
             index: true,
@@ -99,18 +99,15 @@ const matchSchema = new Schema(
         },
         scoreA: {
             type: String,
-            required: true,
             trim: true,
         },
         scoreB: {
             type: String,
-            required: true,
             trim: true,
         },
         winner: {
             type: String,
-            enum: ['A', 'B'],
-            required: true,
+            enum: ['A', 'B', 'undefined'],
         },
     },
     {

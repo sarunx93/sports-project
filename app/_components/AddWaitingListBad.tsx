@@ -46,7 +46,7 @@ const AddWaitingListBad = () => {
 
             <form onSubmit={handleWaitingList} className='space-y-4'>
                 <div>
-                    <label htmlFor='player-name' className='text-sm font-medium text-[var(--foreground)]'>
+                    <label htmlFor='player-name' className='text-sm font-medium text-foreground'>
                         First name
                     </label>
                     <input
@@ -59,7 +59,7 @@ const AddWaitingListBad = () => {
                     />
                 </div>
                 <div>
-                    <label htmlFor='player-last-name' className='text-sm font-medium text-[var(--foreground)]'>
+                    <label htmlFor='player-last-name' className='text-sm font-medium text-foreground'>
                         Last name
                     </label>
                     <input

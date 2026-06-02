@@ -60,7 +60,7 @@ const Timer = ({ match }: TimerProps) => {
         setSaveMessage(null)
     }
 
-    const handleFinish = async (validatedMatch: ValidatedBadmintonMatch) => {
+    const handleFinish = async (validatedMatch?: ValidatedBadmintonMatch) => {
         if (isSaving) return
 
         const duration = formatTime(elapsedTime)
@@ -71,11 +71,10 @@ const Timer = ({ match }: TimerProps) => {
         const result = await recordMatch({
             ...match,
             duration,
-            scoreA: validatedMatch.scoreA,
-            scoreB: validatedMatch.scoreB,
-            winner: validatedMatch.winner,
+            scoreA: validatedMatch?.scoreA,
+            scoreB: validatedMatch?.scoreB,
+            winner: validatedMatch?.winner || 'undefined',
         })
-
         if (!result.ok) {
             setIsSaving(false)
             setSaveMessage(result.message)
@@ -110,15 +109,15 @@ const Timer = ({ match }: TimerProps) => {
         timer.status === 'idle' ? 'Not started' : timer.status === 'running' ? 'Match running' : 'Paused'
 
     return (
-        <div className='rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-5 w-85'>
+        <div className='rounded-3xl border border-(--line) bg-(--surface) p-5 w-85'>
             <div className='flex flex-wrap items-start justify-between gap-4'>
                 <div>
-                    <p className='text-xs font-semibold uppercase tracking-[0.24em] text-[var(--muted)]'>Timer</p>
-                    <div className='mt-2 text-4xl font-semibold tabular-nums text-[var(--foreground)]'>
+                    <p className='text-xs font-semibold uppercase tracking-[0.24em] text-(--muted)'>Timer</p>
+                    <div className='mt-2 text-4xl font-semibold tabular-nums text-foreground'>
                         {formatTime(elapsedTime)}
                     </div>
                 </div>
-                <span className='rounded-full bg-white/88 px-3 py-1 text-xs font-medium text-[var(--foreground)]'>
+                <span className='rounded-full bg-white/88 px-3 py-1 text-xs font-medium text-foreground'>
                     {statusLabel}
                 </span>
             </div>
@@ -168,7 +167,7 @@ const Timer = ({ match }: TimerProps) => {
                 )}
             </div>
 
-            {saveMessage ? <p className='mt-4 text-sm text-[var(--muted)]'>{saveMessage}</p> : null}
+            {saveMessage ? <p className='mt-4 text-sm text-(--muted)'>{saveMessage}</p> : null}
 
             <ScoreModal
                 isOpen={isModalOpen}

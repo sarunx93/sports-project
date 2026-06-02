@@ -1,7 +1,7 @@
 'use client'
 
 import DraggablePlayerCard from '@/app/_components/PlayerCard'
-import { type Player } from '@/app/_utils/sample-player'
+import { type Player } from '@/app/_utils/constants'
 import { DragDropProvider, useDroppable } from '@dnd-kit/react'
 import { useBadmintonStore } from '@/app/_providers/badminton-store-provider'
 import { useState, type ComponentProps } from 'react'
@@ -11,7 +11,7 @@ import AddWaitingListBad from '@/app/_components/AddWaitingListBad'
 import Card from '@/app/_components/Card'
 import CardSection from '@/app/_components/CardSection'
 import { buttonClasses } from '@/app/_components/Button'
-import { boolean } from 'better-auth'
+import Button from '@/app/_components/Button'
 
 type TeamName = 'A' | 'B'
 
@@ -57,7 +57,7 @@ const Page = () => {
     const removePlayerFromMatch = useBadmintonStore((s) => s.removePlayerFromMatch)
     const startMatch = useBadmintonStore((s) => s.startMatch)
     const setMatchType = useBadmintonStore((s) => s.setMatchType)
-    const isMatchReady = teamA.length === 2 && teamB.length === 2
+    const isMatchReady = teamA.length && teamB.length
 
     const [isSingles, setIsSingles] = useState<boolean>(false)
 
@@ -65,7 +65,14 @@ const Page = () => {
         setIsSingles((prev) => !prev)
         setMatchType(isSingles ? 'singles' : 'doubles')
     }
-    console.log(matchType)
+
+    function getTeamLength() {
+        if (matchType === 'singles') {
+            return '1'
+        } else {
+            return '2'
+        }
+    }
 
     const handleDragEnd: DragEndHandler = (event) => {
         const source = event.operation.source
@@ -110,15 +117,20 @@ const Page = () => {
                                 </p>
                             </div>
                             <div className='flex flex-wrap gap-2'>
-                                <button className='border-2 cursor-pointer' onClick={handleToggle}>
-                                    {matchType === 'doubles' ? 'Doubles' : 'Singles'}
-                                </button>
-                                <span className='rounded-full bg-(--success-surface) px-3 py-1 text-xs font-medium text-foreground'>
-                                    Team A: {teamA.length}/2
-                                </span>
-                                <span className='rounded-full bg-(--warning-surface) px-3 py-1 text-xs font-medium text-foreground'>
-                                    Team B: {teamB.length}/2
-                                </span>
+                                <div>
+                                    <Button onClick={handleToggle} className='mr-3.5'>
+                                        {matchType === 'doubles' ? 'Doubles' : 'Singles'}
+                                    </Button>
+                                </div>
+
+                                <div className='flex items-center'>
+                                    <span className='rounded-full bg-(--success-surface) px-3 py-1 text-xs font-medium text-foreground'>
+                                        Team A: {teamA.length}/{getTeamLength()}
+                                    </span>
+                                    <span className='rounded-full bg-(--warning-surface) px-3 py-1 text-xs font-medium text-foreground'>
+                                        Team B: {teamB.length}/{getTeamLength()}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -147,12 +159,12 @@ const Page = () => {
                                                 </p>
                                             </div>
                                             <span className='rounded-full border border-white/80 bg-white/72 px-3 py-1 text-xs font-medium text-foreground'>
-                                                {team.players.length}/2 players
+                                                {team.players.length}/{matchType === 'doubles' ? '2' : '1'} players
                                             </span>
                                         </div>
 
                                         <div className='mt-5 grid gap-4 sm:grid-cols-2'>
-                                            {Array.from({ length: 2 }, (_, index) => {
+                                            {Array.from({ length: matchType === 'doubles' ? 2 : 1 }, (_, index) => {
                                                 const player = team.players[index]
 
                                                 if (!player) {
@@ -193,10 +205,10 @@ const Page = () => {
                             <button
                                 className={buttonClasses({
                                     size: 'lg',
-                                    className: !isMatchReady ? 'pointer-events-none' : '',
+                                    className: !isMatchReady ? 'pointer-events-none' : 'cursor-pointer',
                                 })}
                                 disabled={!isMatchReady}
-                                onClick={() => startMatch(teamA, teamB, 'doubles')}>
+                                onClick={() => startMatch(teamA, teamB, matchType)}>
                                 Start Match
                             </button>
                         </div>

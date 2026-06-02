@@ -1,13 +1,11 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import type { Player } from '@/app/_utils/sample-player'
+import type { Player } from '@/app/_utils/constants'
 import { useStore } from 'zustand'
 import { createBadmintonStore, type MatchArrangeStore, type BadmintonStoreApi } from '@/app/_stores/badminton-store'
 
 const BadmintonStoreContext = createContext<BadmintonStoreApi | null>(null)
-
-
 
 export function BadmintonStoreProvider({
     children,

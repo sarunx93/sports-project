@@ -1,5 +1,5 @@
 import { FaRegPlusSquare, FaRegTrashAlt } from 'react-icons/fa'
-import { type Player } from '../_utils/sample-player'
+import { type Player } from '../_utils/constants'
 
 type Props = {
     player: Player

@@ -21,11 +21,12 @@ export function buttonClasses({
     const baseClasses = [
         'inline-flex items-center justify-center gap-2 rounded-full font-medium transition duration-200',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2',
-        'disabled:cursor-not-allowed disabled:opacity-50',
+        'disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer',
     ]
 
     const variantClasses: Record<ButtonVariant, string> = {
-        primary: 'bg-[var(--brand)] text-white shadow-[0_18px_45px_-22px_rgba(15,118,110,0.9)] hover:bg-[var(--brand-strong)]',
+        primary:
+            'bg-[var(--brand)] text-white shadow-[0_18px_45px_-22px_rgba(15,118,110,0.9)] hover:bg-[var(--brand-strong)]',
         secondary:
             'border border-[var(--line)] bg-white/88 text-[var(--foreground)] shadow-[0_10px_30px_-22px_rgba(15,23,42,0.45)] hover:bg-white',
         ghost: 'text-[var(--foreground)] hover:bg-white/70',

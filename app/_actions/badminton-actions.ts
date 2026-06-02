@@ -1,7 +1,7 @@
 'use server'
 
 import type { EndedMatch } from '@/app/_stores/badminton-store'
-import type { Player } from '@/app/_utils/sample-player'
+import type { Player } from '@/app/_utils/constants'
 import type { PersistedUserProfile } from '@/app/_stores/user-store'
 import type { Sport } from '@/app/_utils/types'
 import { connectMongoose } from '@/app/_lib/mongoose'
@@ -50,24 +50,20 @@ export async function recordMatch(match: EndedMatch): Promise<RecordMatchResult>
         email: user?.emailAddresses[0].emailAddress,
         role: 'player',
     }
-
-    const validation = validateBadmintonMatch(match.scoreA, match.scoreB)
-
-    if (!validation.ok) {
-        return {
-            ok: false,
-            message:
-                validation.errors.general ??
-                validation.errors.scoreA ??
-                validation.errors.scoreB ??
-                'Invalid badminton match score.',
+    let matchData = {}
+    if (match.scoreA && match.scoreB) {
+        const validation = validateBadmintonMatch(match.scoreA, match.scoreB)
+        if (!validation.ok) {
+            return {
+                ok: false,
+                message:
+                    validation.errors.general ??
+                    validation.errors.scoreA ??
+                    validation.errors.scoreB ??
+                    'Invalid badminton match score.',
+            }
         }
-    }
-
-    try {
-        await connectMongoose()
-
-        const savedMatch = await MatchModel.create({
+        matchData = {
             id: match.id,
             teams: {
                 A: match.teams.A,
@@ -78,7 +74,25 @@ export async function recordMatch(match: EndedMatch): Promise<RecordMatchResult>
             scoreA: validation.scoreA,
             scoreB: validation.scoreB,
             winner: validation.winner,
-        })
+        }
+    } else {
+        matchData = {
+            id: match.id,
+            teams: {
+                A: match.teams.A,
+                B: match.teams.B,
+            },
+            duration: match.duration,
+            recordedBy: data,
+            // scoreA: validation.scoreA,
+            // scoreB: validation.scoreB,
+            // winner: validation.winner,
+        }
+    }
+    try {
+        await connectMongoose()
+
+        const savedMatch = await MatchModel.create(matchData)
 
         return {
             ok: true,
@@ -86,6 +100,7 @@ export async function recordMatch(match: EndedMatch): Promise<RecordMatchResult>
             message: 'Match recorded successfully.',
         }
     } catch (error) {
+        console.log(error)
         if (error instanceof Error && 'code' in error && error.code === 11000) {
             return {
                 ok: false,

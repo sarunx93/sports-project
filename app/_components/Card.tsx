@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'react'
 
 type CardTone = 'default' | 'subtle' | 'brand' | 'success' | 'warning'
-type CardPadding = 'sm' | 'md' | 'lg'
+type CardPadding = 'xs' | 'sm' | 'md' | 'lg'
 
 type CardClassOptions = {
     tone?: CardTone
@@ -23,6 +23,7 @@ export function cardClasses({ tone = 'default', padding = 'md', className = '' }
     }
 
     const paddingClasses: Record<CardPadding, string> = {
+        xs: 'p-2',
         sm: 'p-4',
         md: 'p-6',
         lg: 'p-8',
