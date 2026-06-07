@@ -71,8 +71,8 @@ const Timer = ({ match }: TimerProps) => {
         const result = await recordMatch({
             ...match,
             duration,
-            scoreA: validatedMatch?.scoreA,
-            scoreB: validatedMatch?.scoreB,
+            scoreA: validatedMatch?.scoreA ?? '',
+            scoreB: validatedMatch?.scoreB ?? '',
             winner: validatedMatch?.winner || 'undefined',
         })
         if (!result.ok) {
@@ -83,9 +83,9 @@ const Timer = ({ match }: TimerProps) => {
 
         endMatch(match, {
             duration,
-            scoreA: validatedMatch.scoreA,
-            scoreB: validatedMatch.scoreB,
-            winner: validatedMatch.winner,
+            scoreA: validatedMatch?.scoreA ?? '',
+            scoreB: validatedMatch?.scoreB ?? '',
+            winner: validatedMatch?.winner || 'undefined',
         })
         setScoreA('')
         setScoreB('')

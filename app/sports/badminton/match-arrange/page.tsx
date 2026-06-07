@@ -51,6 +51,7 @@ function DroppablePlayerSlot({ player, team, slotIndex, onRemove }: DroppablePla
 const Page = () => {
     const [isSingles, setIsSingles] = useState<boolean>(false)
     const [courtNumber, setCourtNumber] = useState<string>('')
+
     const waitingList = useBadmintonStore((s) => s.waitingList)
     const playingMatches = useBadmintonStore((s) => s.playingMatches)
     const teamA = useBadmintonStore((s) => s.teams.A)
@@ -78,6 +79,11 @@ const Page = () => {
         } else {
             return '2'
         }
+    }
+
+    const handleStartMatch = () => {
+        setCourtNumber('')
+        startMatch(teamA, teamB, matchType, courtNumber)
     }
 
     const handleDragEnd: DragEndHandler = (event) => {
@@ -220,7 +226,7 @@ const Page = () => {
                                     className: !isMatchReady ? 'pointer-events-none' : 'cursor-pointer',
                                 })}
                                 disabled={!isMatchReady}
-                                onClick={() => startMatch(teamA, teamB, matchType, courtNumber)}>
+                                onClick={handleStartMatch}>
                                 Start Match
                             </button>
                         </div>

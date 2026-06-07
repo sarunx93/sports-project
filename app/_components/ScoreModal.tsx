@@ -13,7 +13,7 @@ type ScoreModalModalProps = {
     cancelText?: string
     onSetA: (scoreA: string) => void
     onSetB: (scoreB: string) => void
-    onConfirm: (result: ValidatedBadmintonMatch) => void
+    onConfirm: (result?: ValidatedBadmintonMatch) => void
     onCancel: () => void
     scoreA: string
     scoreB: string
@@ -44,6 +44,12 @@ export default function ScoreModal({
         setScoreAMessage('')
         setScoreBMessage('')
         setGeneralMessage('')
+    }
+
+    function confirmWithoutScore() {
+        clearMessages()
+        setIsConfirmOpen(false)
+        onConfirm()
     }
 
     function validateScore() {
@@ -87,11 +93,11 @@ export default function ScoreModal({
                             onSetA(e.target.value)
                         }}
                     />
-                    <p className='mt-2 text-sm text-[var(--danger)]'>{scoreAMessage}</p>
+                    <p className='mt-2 text-sm text-(--danger)'>{scoreAMessage}</p>
                 </div>
 
                 <div className='mt-4'>
-                    <label htmlFor='team-b-score' className='text-sm font-medium text-[var(--foreground)]'>
+                    <label htmlFor='team-b-score' className='text-sm font-medium text-foreground'>
                         Team B score
                     </label>
                     <input
@@ -115,11 +121,12 @@ export default function ScoreModal({
                     <Button onClick={validateScore}>{confirmText}</Button>
                 </div>
 
-                <p className='mt-4 text-sm text-[var(--danger)]'>{generalMessage}</p>
+                <p className='mt-4 text-sm text-(--danger)'>{generalMessage}</p>
             </div>
             <ConfirmModal
+                title='Are you sure to submit without scores?'
                 isOpen={isConfirmOpen}
-                onConfirm={onConfirm}
+                onConfirm={confirmWithoutScore}
                 onCancel={() => {
                     setIsConfirmOpen(false)
                 }}

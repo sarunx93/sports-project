@@ -1,5 +1,6 @@
 'use client'
 
+import { ValidatedBadmintonMatch } from '../_utils/badminton-score'
 import Button from './Button'
 
 type ConfirmModalProps = {
@@ -15,7 +16,7 @@ type ConfirmModalProps = {
 export default function ConfirmModal({
     isOpen,
     title = 'Are you sure?',
-    message = 'This action cannot be undone.',
+    message = '',
     confirmText = 'Confirm',
     cancelText = 'Cancel',
     onConfirm,
@@ -30,7 +31,7 @@ export default function ConfirmModal({
                 <p className='mt-3 text-sm leading-7 text-[var(--muted)]'>{message}</p>
 
                 <div className='mt-6 flex justify-end gap-3'>
-                    <Button onClick={onCancel} variant='ghost' className='border border-[var(--line)] bg-white/75'>
+                    <Button onClick={onCancel} variant='ghost' className='border border-(--line) bg-white/75'>
                         {cancelText}
                     </Button>
                     <Button onClick={onConfirm} variant='danger'>
