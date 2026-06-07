@@ -51,7 +51,7 @@ const Hero = () => {
                     <Card tone='subtle' padding='sm' className='relative overflow-hidden'>
                         <div className='relative h-80 overflow-hidden rounded-3xl md:h-136'>
                             <Image src={hero} alt='Sports hero image' fill className='object-cover' priority />
-                            <div className='absolute inset-0 bg-gradient-to-t from-[rgba(18,32,51,0.68)] via-transparent to-transparent' />
+                            <div className='absolute inset-0 bg-linear-to-t from-[rgba(18,32,51,0.68)] via-transparent to-transparent' />
                         </div>
 
                         {/* <div className='absolute inset-x-8 bottom-8'>

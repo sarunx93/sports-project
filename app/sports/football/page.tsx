@@ -6,11 +6,11 @@ const page = () => {
     return (
         <div className='mx-auto flex min-h-full max-w-4xl items-center px-4 py-12 sm:px-6'>
             <Card tone='brand' padding='lg' className='w-full text-center'>
-                <p className='text-xs font-semibold uppercase tracking-[0.24em] text-[var(--brand)]'>Tennis</p>
-                <h1 className='mt-4 text-4xl font-semibold tracking-tight text-[var(--foreground)]'>
+                <p className='text-xs font-semibold uppercase tracking-[0.24em] text-(--brand)'>Tennis</p>
+                <h1 className='mt-4 text-4xl font-semibold tracking-tight text-foreground'>
                     This sport view is next in line.
                 </h1>
-                <p className='mx-auto mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]'>
+                <p className='mx-auto mt-4 max-w-2xl text-base leading-7 text-(--muted)'>
                     The route exists now, but the actual experience still needs a proper workflow. Badminton currently
                     has the strongest end-to-end interaction model.
                 </p>

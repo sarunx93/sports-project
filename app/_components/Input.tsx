@@ -2,7 +2,7 @@ type InputProps = {
     label: string
     id: string
     placeholder: string
-    value: string | null
+    value: string
     warning?: string
     onChangeHandler: (targetValue: string) => void
 }
