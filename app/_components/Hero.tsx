@@ -21,11 +21,10 @@ const Hero = () => {
                     </div>
                     <div className='space-y-4'>
                         <h1 className='max-w-3xl text-4xl font-semibold tracking-tight text-foreground md:text-5xl lg:text-6xl'>
-                            Organized desk for all players.
+                            Neatly Organized
                         </h1>
                         <p className='max-w-2xl text-lg leading-8 text-(--muted)'>
-                            Sportsbook works best when the interface sells the workflow: add players, form teams, run
-                            the clock, and keep every club session moving.
+                            Match Desk is your personal sport management assistant. Organize neatly, play delightfully.
                         </p>
                     </div>
 

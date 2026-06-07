@@ -9,16 +9,16 @@ type Props = {
 
 const PlayerListCard = ({ player, handleClickAdd, handleClickRemove }: Props) => {
     return (
-        <div className='flex items-center justify-between gap-4 rounded-[22px] border border-[var(--line)] bg-white/78 p-4 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.38)]'>
+        <div className='flex items-center justify-between gap-4 rounded-[22px] border border-(--line) bg-white/78 p-4 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.38)]'>
             <div className='flex min-w-0 items-center gap-3'>
-                <div className='mr-1 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand)] text-sm font-semibold text-white'>
+                <div className='mr-1 flex h-11 w-11 items-center justify-center rounded-full bg-(--brand) text-sm font-semibold text-white'>
                     {player.name.charAt(0).toUpperCase()}
                 </div>
                 <div className='min-w-0'>
-                    <p className='truncate text-lg font-semibold text-[var(--foreground)]'>
-                        {player.name} {player.lastName.charAt(0).toUpperCase()}.
+                    <p className='truncate text-lg font-semibold text-foreground'>
+                        {player.name} {player.lastName.charAt(0).toUpperCase()}
                     </p>
-                    <p className='mt-2 text-sm text-[var(--muted)]'>Level {player.level.toUpperCase()}</p>
+                    <p className='mt-2 text-sm text-(--muted)'>Level {player.level.toUpperCase()}</p>
                 </div>
             </div>
             <div className='flex items-center gap-2'>

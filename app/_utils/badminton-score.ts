@@ -1,6 +1,6 @@
 export const BADMINTON_SCORE_REGEX = /^\s*\d+\s*(,\s*\d+\s*){1,2}$/
 
-export type MatchWinner = 'A' | 'B'
+export type MatchWinner = 'A' | 'B' | 'undefined'
 export type GameResolution = 'standard' | 'deuce' | 'sudden-death'
 
 type ScoreErrors = {

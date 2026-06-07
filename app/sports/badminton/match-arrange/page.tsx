@@ -12,6 +12,7 @@ import Card from '@/app/_components/Card'
 import CardSection from '@/app/_components/CardSection'
 import { buttonClasses } from '@/app/_components/Button'
 import Button from '@/app/_components/Button'
+import Input from '@/app/_components/Input'
 
 type TeamName = 'A' | 'B'
 
@@ -48,18 +49,23 @@ function DroppablePlayerSlot({ player, team, slotIndex, onRemove }: DroppablePla
 }
 
 const Page = () => {
+    const [isSingles, setIsSingles] = useState<boolean>(false)
+    const [courtNumber, setCourtNumber] = useState<string>('')
     const waitingList = useBadmintonStore((s) => s.waitingList)
+    const playingMatches = useBadmintonStore((s) => s.playingMatches)
     const teamA = useBadmintonStore((s) => s.teams.A)
     const teamB = useBadmintonStore((s) => s.teams.B)
     const matchType = useBadmintonStore((s) => s.matchTypes)
+
+    const courtsInUseArr = playingMatches.map((match) => match.courtNumber)
+
+    const isCourtInUse = courtsInUseArr.includes(courtNumber)
 
     const swapPlayers = useBadmintonStore((s) => s.swapPlayers)
     const removePlayerFromMatch = useBadmintonStore((s) => s.removePlayerFromMatch)
     const startMatch = useBadmintonStore((s) => s.startMatch)
     const setMatchType = useBadmintonStore((s) => s.setMatchType)
-    const isMatchReady = teamA.length && teamB.length
-
-    const [isSingles, setIsSingles] = useState<boolean>(false)
+    const isMatchReady = teamA.length && teamB.length && courtNumber && !isCourtInUse
 
     const handleToggle = () => {
         setIsSingles((prev) => !prev)
@@ -110,7 +116,13 @@ const Page = () => {
                     <Card tone='default' padding='lg' className='min-h-128'>
                         <div className='mb-6 flex flex-col gap-4 rounded-3xl border border-dashed border-(--line) bg-(--surface) p-5 lg:flex-row lg:items-center lg:justify-between'>
                             <div>
-                                <p className='text-sm font-medium text-foreground'>Current setup</p>
+                                <Input
+                                    label='Court Number'
+                                    placeholder='กรุณาใส่หมายเลขคอร์ท'
+                                    id='court-number'
+                                    value={courtNumber}
+                                    onChangeHandler={setCourtNumber}
+                                />
 
                                 <p className='mt-1 text-sm text-(--muted)'>
                                     {waitingList.length} waiting, {teamA.length + teamB.length} placed into teams
@@ -171,7 +183,7 @@ const Page = () => {
                                                     return (
                                                         <div
                                                             key={`${team.team}-empty-${index}`}
-                                                            className='flex min-h-32 items-center justify-center rounded-[22px] border border-dashed border-[var(--line)] bg-white/55 p-5 text-center text-sm leading-6 text-[var(--muted)]'>
+                                                            className='flex min-h-32 items-center justify-center rounded-[22px] border border-dashed border-(--line) bg-white/55 p-5 text-center text-sm leading-6 text-(--muted)'>
                                                             Add a player from the waiting list
                                                         </div>
                                                     )
@@ -198,7 +210,7 @@ const Page = () => {
                                 <p className='text-lg font-semibold text-[var(--foreground)]'>
                                     {isMatchReady ? 'Ready to start the match.' : 'Each team needs two players.'}
                                 </p>
-                                <p className='mt-1 text-sm text-[var(--muted)]'>
+                                <p className='mt-1 text-sm text-(--muted)'>
                                     The start action stays disabled until the match is fully staffed.
                                 </p>
                             </div>
@@ -208,7 +220,7 @@ const Page = () => {
                                     className: !isMatchReady ? 'pointer-events-none' : 'cursor-pointer',
                                 })}
                                 disabled={!isMatchReady}
-                                onClick={() => startMatch(teamA, teamB, matchType)}>
+                                onClick={() => startMatch(teamA, teamB, matchType, courtNumber)}>
                                 Start Match
                             </button>
                         </div>

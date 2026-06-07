@@ -9,7 +9,7 @@ import { buttonClasses } from '@/app/_components/Button'
 
 const Page = () => {
     const playingMatches = useBadmintonStore((s) => s.playingMatches)
-    console.log(playingMatches)
+
     return (
         <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6'>
             <CardSection
@@ -27,7 +27,7 @@ const Page = () => {
                     <MatchSection playingMatches={playingMatches} />
                 ) : (
                     <Card tone='subtle' padding='lg' className='text-center'>
-                        <h3 className='text-2xl font-semibold text-[var(--foreground)]'>No active matches yet.</h3>
+                        <h3 className='text-2xl font-semibold text-foreground'>No active matches yet.</h3>
                         <p className='mx-auto mt-3 max-w-2xl text-base leading-7 text-[var(--muted)]'>
                             Start a match from the arrangement page and it will appear here with timer controls and
                             score entry.

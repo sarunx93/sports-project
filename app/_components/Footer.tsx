@@ -4,6 +4,7 @@ const footerLinks = [
     { href: '/', label: 'Home' },
     { href: '/sports/badminton', label: 'Badminton' },
     { href: '/sports/tennis', label: 'Tennis' },
+    { href: '/sports/football', label: 'Football' },
     { href: '/register', label: 'Club Setup' },
 ]
 

@@ -5,22 +5,6 @@ import { buttonClasses } from './Button'
 import { sports } from '../_utils/constants'
 import Image from 'next/image'
 
-const platformHighlights = [
-    {
-        title: 'One club identity',
-        description: 'Guide a user from sign-in to club setup without dumping them into an empty page.',
-    },
-    {
-        title: 'Fast match control',
-        description:
-            'The badminton flow is the strongest product story, so surface it earlier and style it like the flagship.',
-    },
-    {
-        title: 'Clear progression',
-        description: 'Show which sports are live, which are in progress, and which are only placeholders.',
-    },
-]
-
 const SportListHome = () => {
     return (
         <section className='mx-auto px-8 py-8 sm:px-6 md:py-14 bg-(--surface)'>
@@ -72,15 +56,6 @@ const SportListHome = () => {
                     ))}
                 </div>
             </CardSection>
-
-            <div className='mt-10 grid gap-5 md:grid-cols-3'>
-                {platformHighlights.map((item) => (
-                    <Card key={item.title} tone='subtle' padding='md' className='h-full'>
-                        <h3 className='text-lg font-semibold text-foreground'>{item.title}</h3>
-                        <p className='mt-3 text-sm leading-7 text-(--muted)'>{item.description}</p>
-                    </Card>
-                ))}
-            </div>
         </section>
     )
 }

@@ -35,7 +35,7 @@ const WaitingListBadminton = () => {
                     <p className='text-xs font-semibold uppercase tracking-[0.24em] text-[var(--brand)]'>Queue</p>
                     <h2 className='mt-3 text-2xl font-semibold text-[var(--foreground)]'>Waiting list</h2>
                 </div>
-                <span className='rounded-full bg-[var(--brand-surface)] px-3 py-1 text-xs font-medium text-[var(--foreground)]'>
+                <span className='rounded-full bg-(--brand-surface) px-3 py-1 text-xl font-medium text-foreground'>
                     {waitingList.length} players
                 </span>
             </div>

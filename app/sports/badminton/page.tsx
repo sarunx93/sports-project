@@ -10,11 +10,11 @@ const page = async () => {
         return (
             <div className='mx-auto flex min-h-full max-w-3xl items-center px-4 py-12 sm:px-6'>
                 <Card tone='brand' padding='lg' className='w-full text-center'>
-                    <p className='text-xs font-semibold uppercase tracking-[0.24em] text-[var(--brand)]'>Badminton</p>
-                    <h1 className='mt-4 text-4xl font-semibold tracking-tight text-[var(--foreground)]'>
+                    <p className='text-xs font-semibold uppercase tracking-[0.24em] text-(--brand)'>Badminton</p>
+                    <h1 className='mt-4 text-4xl font-semibold tracking-tight text-foreground'>
                         Sign in to open the badminton desk.
                     </h1>
-                    <p className='mt-4 text-base leading-7 text-[var(--muted)]'>
+                    <p className='mt-4 text-base leading-7 text-(--muted)'>
                         The page is designed around club sessions, so the useful parts start once a player profile exists.
                     </p>
                 </Card>
@@ -27,13 +27,13 @@ const page = async () => {
             <Card tone='brand' padding='lg' className='overflow-hidden'>
                 <div className='grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]'>
                     <div>
-                        <p className='text-xs font-semibold uppercase tracking-[0.24em] text-[var(--brand)]'>
+                        <p className='text-xs font-semibold uppercase tracking-[0.24em] text-(--brand)'>
                             Welcome back
                         </p>
-                        <h1 className='mt-4 text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl'>
+                        <h1 className='mt-4 text-4xl font-semibold tracking-tight text-foreground md:text-5xl'>
                             Build the next badminton session without hunting for controls.
                         </h1>
-                        <p className='mt-4 max-w-2xl text-base leading-8 text-[var(--muted)]'>
+                        <p className='mt-4 max-w-2xl text-base leading-8 text-(--muted)'>
                             Start from the waiting list, balance two doubles teams, run the timer, and record the score in
                             the same workflow.
                         </p>

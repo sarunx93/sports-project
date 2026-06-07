@@ -21,9 +21,10 @@ export type PlayingMatches = {
     teams: TeamPlayers
     type?: MatchTypes
     matchNumber: number
+    courtNumber: string
 }
 
-export type EndedMatch = PlayingMatches & { duration: string; scoreA?: string; scoreB?: string; winner: MatchWinner }
+export type EndedMatch = PlayingMatches & { duration: string; scoreA: string; scoreB: string; winner: MatchWinner }
 
 type NewPlayerInput = Omit<Player, 'id'>
 
@@ -51,7 +52,7 @@ type MatchArrangeState = {
     teams: TeamPlayers
     playingMatches: PlayingMatches[]
     endedMatches: EndedMatch[]
-    matchTimers: Record<number, MatchTimerState>
+    matchTimers: Record<string, MatchTimerState>
     matchTypes: MatchTypes
 }
 
@@ -61,13 +62,14 @@ type MatchArrangeActions = {
     removePlayerFromWaitingList: (player: Player) => void
     removeAllPlayersFromWaitingList: () => void
     removePlayerFromMatch: (player: Player) => void
+    removePlayingMatch: (match: PlayingMatches) => void
     swapPlayers: (source: DragLocation, target: DragLocation) => void
-    startMatch: (teamA: Player[], teamB: Player[], type: MatchTypes) => void
+    startMatch: (teamA: Player[], teamB: Player[], type: MatchTypes, courtNumber: string) => void
     endMatch: (match: PlayingMatches, result: Pick<EndedMatch, 'duration' | 'scoreA' | 'scoreB' | 'winner'>) => void
-    startTimer: (matchId: number) => void
-    pauseTimer: (matchId: number) => void
-    resumeTimer: (matchId: number) => void
-    resetTimer: (matchId: number) => void
+    startTimer: (matchId: string) => void
+    pauseTimer: (matchId: string) => void
+    resumeTimer: (matchId: string) => void
+    resetTimer: (matchId: string) => void
     setMatchType: (matchTypeInput: MatchTypes) => void
 }
 
@@ -95,13 +97,186 @@ function getPlayersPerTeam(matchType: MatchTypes) {
     return matchType === 'singles' ? 1 : 2
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null
+}
+
+function isMatchType(value: unknown): value is MatchTypes {
+    return value === 'singles' || value === 'doubles'
+}
+
+function isMatchWinner(value: unknown): value is MatchWinner {
+    return value === 'A' || value === 'B' || value === 'undefined'
+}
+
+function normalizePlayer(value: unknown): Player | null {
+    if (!isRecord(value)) {
+        return null
+    }
+
+    if (typeof value.id !== 'number' || !Number.isFinite(value.id)) {
+        return null
+    }
+
+    if (typeof value.name !== 'string' || typeof value.level !== 'string') {
+        return null
+    }
+
+    return {
+        id: value.id,
+        name: value.name,
+        lastName: typeof value.lastName === 'string' ? value.lastName : '',
+        level: value.level,
+    }
+}
+
+function normalizePlayers(value: unknown) {
+    if (!Array.isArray(value)) {
+        return []
+    }
+
+    return value.flatMap((player) => {
+        const normalizedPlayer = normalizePlayer(player)
+
+        return normalizedPlayer ? [normalizedPlayer] : []
+    })
+}
+
+function normalizeTeams(value: unknown): TeamPlayers {
+    if (!isRecord(value)) {
+        return { A: [], B: [] }
+    }
+
+    return {
+        A: normalizePlayers(value.A),
+        B: normalizePlayers(value.B),
+    }
+}
+
+function normalizeMatchTimer(value: unknown): MatchTimerState | null {
+    if (!isRecord(value)) {
+        return null
+    }
+
+    if (value.status !== 'idle' && value.status !== 'running' && value.status !== 'paused') {
+        return null
+    }
+
+    return {
+        status: value.status,
+        startedAt: typeof value.startedAt === 'number' ? value.startedAt : null,
+        accumulatedMs: typeof value.accumulatedMs === 'number' ? value.accumulatedMs : 0,
+    }
+}
+
+function normalizeMatchTimers(value: unknown): Record<string, MatchTimerState> {
+    if (!isRecord(value)) {
+        return {}
+    }
+
+    return Object.fromEntries(
+        Object.entries(value).flatMap(([matchId, timer]) => {
+            const normalizedTimer = normalizeMatchTimer(timer)
+
+            return normalizedTimer ? [[matchId, normalizedTimer]] : []
+        }),
+    )
+}
+
+function normalizePlayingMatch(value: unknown, index: number): PlayingMatches | null {
+    if (!isRecord(value) || !isRecord(value.teams)) {
+        return null
+    }
+
+    const id = typeof value.id === 'string' ? value.id : typeof value.id === 'number' ? String(value.id) : ''
+
+    if (!id) {
+        return null
+    }
+
+    return {
+        id,
+        teams: normalizeTeams(value.teams),
+        type: isMatchType(value.type) ? value.type : undefined,
+        matchNumber: typeof value.matchNumber === 'number' ? value.matchNumber : index + 1,
+        courtNumber: typeof value.courtNumber === 'string' ? value.courtNumber : '',
+    }
+}
+
+function normalizePlayingMatches(value: unknown) {
+    if (!Array.isArray(value)) {
+        return []
+    }
+
+    return value.flatMap((match, index) => {
+        const normalizedMatch = normalizePlayingMatch(match, index)
+
+        return normalizedMatch ? [normalizedMatch] : []
+    })
+}
+
+function normalizeEndedMatches(value: unknown): EndedMatch[] {
+    if (!Array.isArray(value)) {
+        return []
+    }
+
+    return value.flatMap((match, index) => {
+        if (!isRecord(match)) {
+            return []
+        }
+
+        const normalizedMatch = normalizePlayingMatch(match, index)
+
+        if (!normalizedMatch) {
+            return []
+        }
+
+        return [
+            {
+                ...normalizedMatch,
+                duration: typeof match.duration === 'string' ? match.duration : '',
+                scoreA: typeof match.scoreA === 'string' ? match.scoreA : '',
+                scoreB: typeof match.scoreB === 'string' ? match.scoreB : '',
+                winner: isMatchWinner(match.winner) ? match.winner : 'undefined',
+            },
+        ]
+    })
+}
+
+function normalizePersistedState(persistedState: unknown, currentState: MatchArrangeStore): MatchArrangeStore {
+    if (!isRecord(persistedState)) {
+        return currentState
+    }
+
+    return {
+        ...currentState,
+        waitingList: Array.isArray(persistedState.waitingList)
+            ? normalizePlayers(persistedState.waitingList)
+            : currentState.waitingList,
+        teams: isRecord(persistedState.teams) ? normalizeTeams(persistedState.teams) : currentState.teams,
+        playingMatches: Array.isArray(persistedState.playingMatches)
+            ? normalizePlayingMatches(persistedState.playingMatches)
+            : currentState.playingMatches,
+        endedMatches: Array.isArray(persistedState.endedMatches)
+            ? normalizeEndedMatches(persistedState.endedMatches)
+            : currentState.endedMatches,
+        matchTimers: isRecord(persistedState.matchTimers)
+            ? normalizeMatchTimers(persistedState.matchTimers)
+            : currentState.matchTimers,
+        matchTypes: isMatchType(persistedState.matchTypes) ? persistedState.matchTypes : currentState.matchTypes,
+    }
+}
+
+function getPlayersFromTeams(teams: Partial<TeamPlayers> | undefined) {
+    return [...(teams?.A ?? []), ...(teams?.B ?? [])]
+}
+
 function getNextPlayerId(state: MatchArrangeState) {
     const ids = [
         ...state.waitingList.map((player) => player.id),
-        ...state.teams.A.map((player) => player.id),
-        ...state.teams.B.map((player) => player.id),
-        ...state.playingMatches.flatMap((match) => [...match.teams.A, ...match.teams.B].map((player) => player.id)),
-        ...state.endedMatches.flatMap((match) => [...match.teams.A, ...match.teams.B].map((player) => player.id)),
+        ...getPlayersFromTeams(state.teams).map((player) => player.id),
+        ...state.playingMatches.flatMap((match) => getPlayersFromTeams(match.teams).map((player) => player.id)),
+        ...state.endedMatches.flatMap((match) => getPlayersFromTeams(match.teams).map((player) => player.id)),
     ]
 
     return Math.max(0, ...ids) + 1
@@ -149,10 +324,10 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                 addPlayerToWaitingList: (player) =>
                     set((state) => {
                         const name = player.name.trim()
-                        const lastName = player.lastName.trim()
+                        const lastName = player.lastName.trim() || ''
                         const level = player.level.trim()
 
-                        if (!name || !lastName || !level) {
+                        if (!name || !level) {
                             return state
                         }
 
@@ -320,6 +495,18 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                             },
                         }
                     }),
+                removePlayingMatch: (match: PlayingMatches) =>
+                    set((state) => {
+                        const { teams } = match
+
+                        const remainingPlayingMatches = state.playingMatches.filter((m) => m.id !== match.id)
+
+                        return {
+                            ...state,
+                            playingMatches: remainingPlayingMatches,
+                            waitingList: [...state.waitingList, ...teams.A, ...teams.B],
+                        }
+                    }),
                 swapPlayers: (source, target) =>
                     set((state) => {
                         if (source.team === target.team && source.slotIndex === target.slotIndex) {
@@ -346,17 +533,18 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                             teams: nextTeams,
                         }
                     }),
-                startMatch: (teamA: Player[], teamB: Player[], type: MatchTypes) =>
+                startMatch: (teamA: Player[], teamB: Player[], type: MatchTypes, courtNumber: string) =>
                     set((state) => {
+                        // if()
                         const matchId = uuidv4()
 
                         const matchNumber = Math.max(0, state.playingMatches.length) + 1
-                        console.log(matchNumber)
                         return {
                             ...state,
                             teams: { A: [], B: [] },
                             playingMatches: [
                                 ...state.playingMatches,
+
                                 {
                                     id: matchId,
                                     teams: {
@@ -365,6 +553,7 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                                     },
                                     type,
                                     matchNumber,
+                                    courtNumber,
                                 },
                             ],
                             matchTimers: {
@@ -393,6 +582,9 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                                         A: [...teamA],
                                         B: [...teamB],
                                     },
+                                    type: match.type,
+                                    matchNumber: match.matchNumber,
+                                    courtNumber: match.courtNumber,
                                     duration: result.duration,
                                     scoreA: result.scoreA,
                                     scoreB: result.scoreB,
@@ -414,6 +606,7 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                     matchTimers: state.matchTimers,
                     matchTypes: state.matchTypes,
                 }),
+                merge: normalizePersistedState,
                 skipHydration: true,
             },
         ),

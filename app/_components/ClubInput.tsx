@@ -101,7 +101,7 @@ const ClubInput = () => {
                 </div>
 
                 {state.message ? (
-                    <p className={`md:col-span-2 text-sm ${state.ok ? 'text-[var(--brand)]' : 'text-[var(--danger)]'}`}>
+                    <p className={`md:col-span-2 text-sm ${state.ok ? 'text-(--brand)' : 'text-(--danger)'}`}>
                         {state.message}
                     </p>
                 ) : null}
