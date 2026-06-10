@@ -30,8 +30,11 @@ const MatchSection = ({ playingMatches }: MatchSectionProps) => {
                                     <h3>Court {match.courtNumber}</h3>
                                 </div>
 
-                                <Button className='cursor-pointer' onClick={() => removePlayingMatch(match)}>
-                                    remove
+                                <Button
+                                    className='cursor-pointer p-0.5'
+                                    variant='danger'
+                                    onClick={() => removePlayingMatch(match)}>
+                                    Remove
                                 </Button>
                             </div>
                             <Timer match={match} key={match.id} />
