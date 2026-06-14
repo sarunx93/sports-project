@@ -56,15 +56,8 @@ const Navbar = () => {
                     <div className='flex items-center gap-3'>
                         {currentUser ? (
                             <>
-                                <Link
-                                    href={preferredSportHref}
-                                    className={buttonClasses({ variant: 'secondary', size: 'sm' })}>
-                                    Dashboard
-                                </Link>
                                 <div className='hidden text-right md:block'>
-                                    <p className='text-sm font-medium text-foreground'>
-                                        {currentUser.displayName}
-                                    </p>
+                                    <p className='text-sm font-medium text-foreground'>{currentUser.displayName}</p>
                                     <p className='text-xs text-(--muted)'>
                                         {currentUser.clubName ? currentUser.clubName : 'No club set yet'}
                                     </p>

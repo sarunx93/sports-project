@@ -28,7 +28,7 @@ export function buttonClasses({
         primary:
             'bg-[var(--brand)] text-white shadow-[0_18px_45px_-22px_rgba(15,118,110,0.9)] hover:bg-[var(--brand-strong)]',
         secondary:
-            'border border-[var(--line)] bg-white/88 text-[var(--foreground)] shadow-[0_10px_30px_-22px_rgba(15,23,42,0.45)] hover:bg-white',
+            'border border-[var(--line)] bg-white/88 text-[var(--foreground)] shadow-[0_10px_30px_-22px_rgba(15,23,42,0.45)] hover:bg-[var(--brand-surface)]',
         ghost: 'text-[var(--foreground)] hover:bg-white/70',
         danger: 'bg-[var(--danger)] text-white shadow-[0_18px_45px_-22px_rgba(220,38,38,0.85)] hover:bg-[#b91c1c]',
     }

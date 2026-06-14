@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Geist_Mono, Inter, Montserrat } from 'next/font/google'
+import { Geist_Mono, Inter, Montserrat, IBM_Plex_Sans_Thai, Kanit } from 'next/font/google'
 import './globals.css'
 import Navbar from './_components/Navbar'
 import { ClerkProvider } from '@clerk/nextjs'
@@ -8,7 +8,6 @@ import { UserStoreProvider } from './_providers/user-store-provider'
 import { mergeCurrentUser } from './_stores/user-store'
 import UserModel from '@/models/User'
 import { connectMongoose } from './_lib/mongoose'
-import Footer from './_components/Footer'
 
 const inter = Inter({
     variable: '--font-inter',
@@ -23,6 +22,18 @@ const montserrat = Montserrat({
 const geistMono = Geist_Mono({
     variable: '--font-geist-mono',
     subsets: ['latin'],
+})
+
+const sans = IBM_Plex_Sans_Thai({
+    variable: '--font-sans',
+    subsets: ['thai', 'latin'],
+    weight: ['400', '500', '600', '700'],
+})
+
+const heading = Kanit({
+    variable: '--font-heading',
+    subsets: ['thai', 'latin'],
+    weight: ['500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -47,7 +58,7 @@ export default async function RootLayout({
         <ClerkProvider>
             <html lang='en'>
                 <body
-                    className={`${inter.variable} ${montserrat.variable} ${geistMono.variable} flex h-dvh flex-col antialiased`}>
+                    className={`${sans.variable} ${heading.variable} ${geistMono.variable} flex h-dvh flex-col antialiased`}>
                     <UserStoreProvider initialState={{ currentUser: mergeCurrentUser(clerkUser, currentUserProfile) }}>
                         <Navbar />
                         <main className='flex-1 min-h-0 overflow-y-auto'>{children}</main>

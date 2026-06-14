@@ -1,4 +1,7 @@
+'use client'
+
 import type { HTMLAttributes } from 'react'
+import { useInView } from '../hooks/useInView'
 
 type CardTone = 'default' | 'subtle' | 'brand' | 'success' | 'warning'
 type CardPadding = 'xs' | 'sm' | 'md' | 'lg'
@@ -7,6 +10,8 @@ type CardClassOptions = {
     tone?: CardTone
     padding?: CardPadding
     className?: string
+    isAnimated?: boolean
+    delay?: number
 }
 
 type CardProps = HTMLAttributes<HTMLDivElement> & CardClassOptions
@@ -32,7 +37,22 @@ export function cardClasses({ tone = 'default', padding = 'md', className = '' }
     return [...baseClasses, toneClasses[tone], paddingClasses[padding], className].filter(Boolean).join(' ')
 }
 
-const Card = ({ tone = 'default', padding = 'md', className, ...props }: CardProps) => {
+const Card = ({ tone = 'default', padding = 'md', className, isAnimated = false, delay, ...props }: CardProps) => {
+    const { ref, isInView } = useInView()
+
+    if (isAnimated) {
+        className = className + ` card ${isInView ? 'show' : ''}`
+        return (
+            <div
+                ref={ref}
+                className={cardClasses({ tone, padding, className })}
+                style={{
+                    transitionDelay: `${delay}ms`,
+                }}
+                {...props}
+            />
+        )
+    }
     return <div className={cardClasses({ tone, padding, className })} {...props} />
 }
 
