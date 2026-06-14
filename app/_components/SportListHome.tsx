@@ -15,7 +15,12 @@ const SportListHome = () => {
                 description='Each sport should communicate its current maturity level and give the user a clear next step.'>
                 <div className='grid gap-5 lg:grid-cols-3 p-'>
                     {sports.map((sport) => (
-                        <Card key={sport.name} tone={sport.tone} padding='lg' className='flex h-full flex-col gap-6'>
+                        <Card
+                            key={sport.name}
+                            tone={sport.tone}
+                            padding='lg'
+                            className='flex h-full flex-col gap-6'
+                            isAnimated={true}>
                             <div className='space-y-4'>
                                 <div className='flex items-center gap-3'>
                                     <Image src={sport.img} alt='image' height={150} />
