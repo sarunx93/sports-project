@@ -5,6 +5,7 @@ import { buttonClasses } from '@/app/_components/Button'
 
 const page = async () => {
     const user = await currentUser()
+    console.log(user)
 
     if (!user) {
         return (
@@ -15,7 +16,8 @@ const page = async () => {
                         Sign in to open the badminton desk.
                     </h1>
                     <p className='mt-4 text-base leading-7 text-(--muted)'>
-                        The page is designed around club sessions, so the useful parts start once a player profile exists.
+                        The page is designed around club sessions, so the useful parts start once a player profile
+                        exists.
                     </p>
                 </Card>
             </div>
@@ -27,15 +29,13 @@ const page = async () => {
             <Card tone='brand' padding='lg' className='overflow-hidden'>
                 <div className='grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]'>
                     <div>
-                        <p className='text-xs font-semibold uppercase tracking-[0.24em] text-(--brand)'>
-                            Welcome back
-                        </p>
+                        <p className='text-xs font-semibold uppercase tracking-[0.24em] text-(--brand)'>Welcome back</p>
                         <h1 className='mt-4 text-4xl font-semibold tracking-tight text-foreground md:text-5xl'>
                             Build the next badminton session without hunting for controls.
                         </h1>
                         <p className='mt-4 max-w-2xl text-base leading-8 text-(--muted)'>
-                            Start from the waiting list, balance two doubles teams, run the timer, and record the score in
-                            the same workflow.
+                            Start from the waiting list, balance two doubles teams, run the timer, and record the score
+                            in the same workflow.
                         </p>
 
                         <div className='mt-8 flex flex-wrap gap-3'>
@@ -50,20 +50,20 @@ const page = async () => {
                         </div>
                     </div>
 
-                    <div className='grid gap-4'>
-                        <div className='rounded-[24px] border border-white/80 bg-white/82 p-5'>
-                            <p className='text-sm font-medium text-[var(--foreground)]'>Player</p>
-                            <p className='mt-2 text-2xl font-semibold text-[var(--foreground)]'>
+                    <div className='grid gap-4 items-center'>
+                        <div className='rounded-3xl border border-white/80 bg-white/82 p-5'>
+                            <p className='text-sm font-medium text-foreground'>Player</p>
+                            <p className='mt-2 text-2xl font-semibold text-foreground'>
                                 {user.firstName ?? user.username ?? 'Club member'}
                             </p>
-                            <p className='mt-1 text-sm text-[var(--muted)]'>Signed in and ready for session setup</p>
+                            <p className='mt-1 text-sm text-(--muted)'>Signed in and ready for session setup</p>
                         </div>
-                        <div className='rounded-[24px] border border-white/80 bg-white/72 p-5'>
+                        {/* <div className='rounded-[24px] border border-white/80 bg-white/72 p-5'>
                             <p className='text-sm font-medium text-[var(--foreground)]'>Workflow</p>
                             <p className='mt-2 text-base leading-7 text-[var(--muted)]'>
                                 Waiting list, team building, live timers, and score entry are already wired for badminton.
                             </p>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </Card>

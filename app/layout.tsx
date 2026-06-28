@@ -9,15 +9,15 @@ import { mergeCurrentUser } from './_stores/user-store'
 import UserModel from '@/models/User'
 import { connectMongoose } from './_lib/mongoose'
 
-const inter = Inter({
-    variable: '--font-inter',
-    subsets: ['latin'],
-})
+// const inter = Inter({
+//     variable: '--font-inter',
+//     subsets: ['latin'],
+// })
 
-const montserrat = Montserrat({
-    variable: '--font-montserrat',
-    subsets: ['latin'],
-})
+// const montserrat = Montserrat({
+//     variable: '--font-montserrat',
+//     subsets: ['latin'],
+// })
 
 const geistMono = Geist_Mono({
     variable: '--font-geist-mono',

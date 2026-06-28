@@ -31,7 +31,7 @@ const MatchSection = ({ playingMatches }: MatchSectionProps) => {
                                 </div>
 
                                 <Button
-                                    className='cursor-pointer p-0.5'
+                                    className='cursor-pointer'
                                     variant='danger'
                                     onClick={() => removePlayingMatch(match)}>
                                     Remove

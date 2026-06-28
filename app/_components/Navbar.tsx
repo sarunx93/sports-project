@@ -9,6 +9,7 @@ import logo from '@/public/sports_logo.png'
 
 const Navbar = () => {
     const currentUser = useUserStore((state) => state.currentUser)
+
     const navLinks = [
         { href: '/', label: 'Home' },
         { href: '/sports/badminton', label: 'Badminton' },

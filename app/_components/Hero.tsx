@@ -24,7 +24,7 @@ const Hero = () => {
     useEffect(() => {
         const intervalId = setInterval(() => {
             setHighlightIndex((index) => (index + 1) % sportsHighlight.length)
-        }, 2000)
+        }, 20000)
         return () => window.clearInterval(intervalId)
     }, [])
 
@@ -50,7 +50,7 @@ const Hero = () => {
                             Manage Your Club !!
                         </h1>
                         <p className='max-w-2xl text-lg leading-8 text-(--muted)'>
-                            จัดการคลับกีฬาของคุณอย่างมือออาชีพ ด้วย Match Desk ที่ครอบคลุม 3 กีฬายอดนิยมในไทย
+                            Manage your 3 beloved sports for all Thais. Run smoothly, play delightly.
                         </p>
                     </div>
 
@@ -61,7 +61,7 @@ const Hero = () => {
                                 variant: 'secondary',
                                 size: 'lg',
                             })}>
-                            สร้าง club ของคุณ
+                            Create your club
                         </Link>
                     </div>
 

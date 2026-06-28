@@ -7,7 +7,7 @@ import Image from 'next/image'
 
 const SportListHome = () => {
     return (
-        <section className='mx-auto px-8 py-8 sm:px-6 md:py-14 bg-(--surface)'>
+        <section className='sport-list mx-auto px-8 py-8 sm:px-6 md:py-14 bg-(--surface)'>
             <CardSection
                 className='p-20'
                 eyebrow='Sports Overview'
@@ -22,7 +22,7 @@ const SportListHome = () => {
                             className='flex h-full flex-col gap-6'
                             isAnimated={true}>
                             <div className='space-y-4'>
-                                <div className='flex items-center gap-3'>
+                                <div className='md:flex items-center gap-3'>
                                     <Image src={sport.img} alt='image' height={150} />
                                     <h3 className='text-3xl font-semibold text-foreground'>{sport.name}</h3>
                                 </div>

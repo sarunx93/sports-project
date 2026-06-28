@@ -103,7 +103,7 @@ const Page = () => {
         <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6'>
             <CardSection
                 eyebrow='Badminton Workspace'
-                title='Build the next doubles match.'
+                title='Build the next match.'
                 description='Use the waiting list on the left, place players into teams, and start the match once both sides are full.'
                 actions={
                     <Link
@@ -124,7 +124,7 @@ const Page = () => {
                             <div>
                                 <Input
                                     label='Court Number'
-                                    placeholder='กรุณาใส่หมายเลขคอร์ท'
+                                    placeholder='Enter court number'
                                     id='court-number'
                                     value={courtNumber}
                                     onChangeHandler={setCourtNumber}
@@ -184,6 +184,7 @@ const Page = () => {
                                         <div className='mt-5 grid gap-4 sm:grid-cols-2'>
                                             {Array.from({ length: matchType === 'doubles' ? 2 : 1 }, (_, index) => {
                                                 const player = team.players[index]
+                                                console.log('player', player)
 
                                                 if (!player) {
                                                     return (

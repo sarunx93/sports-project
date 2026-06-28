@@ -23,7 +23,7 @@ export function useInView(options?: IntersectionObserverInit) {
                 }
             },
             {
-                threshold: 0.3,
+                threshold: 0.5,
                 ...options,
             },
         )
