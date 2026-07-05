@@ -133,14 +133,14 @@ const Timer = ({ match }: TimerProps) => {
                         <Button variant='secondary' className='bg-emerald-600 blac' onClick={handlePause}>
                             Pause
                         </Button>
-                        <Button variant='ghost' className='border border-(--line) bg-white/72' onClick={handleReset}>
+                        <Button variant='secondary' onClick={handleReset}>
                             Reset
                         </Button>
                         <Button
                             disabled={isSaving}
                             onClick={() => setIsModalOpen(true)}
                             variant='secondary'
-                            className='bg-foreground black hover:bg-[rgba(18,32,51,0.92)]'>
+                            className='bg-foreground black'>
                             {isSaving ? 'Saving...' : 'Finish'}
                         </Button>
                     </>
@@ -156,11 +156,7 @@ const Timer = ({ match }: TimerProps) => {
                         <Button variant='ghost' className='border border-(--line) bg-white/72' onClick={handleReset}>
                             Reset
                         </Button>
-                        <Button
-                            disabled={isSaving}
-                            onClick={() => setIsModalOpen(true)}
-                            variant='secondary'
-                            className='bg-foreground black hover:bg-[rgba(18,32,51,0.92)]'>
+                        <Button disabled={isSaving} onClick={() => setIsModalOpen(true)}>
                             {isSaving ? 'Saving...' : 'Finish'}
                         </Button>
                     </>

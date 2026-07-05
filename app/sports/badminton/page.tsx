@@ -5,7 +5,6 @@ import { buttonClasses } from '@/app/_components/Button'
 
 const page = async () => {
     const user = await currentUser()
-    console.log(user)
 
     if (!user) {
         return (
@@ -40,7 +39,7 @@ const page = async () => {
 
                         <div className='mt-8 flex flex-wrap gap-3'>
                             <Link href='/sports/badminton/match-arrange' className={buttonClasses({ size: 'lg' })}>
-                                Arrange a match
+                                <p className='text-white bold'>Arrange a match</p>
                             </Link>
                             <Link
                                 href='/sports/badminton/all-matches'

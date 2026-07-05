@@ -38,15 +38,6 @@ const HeroSlide = () => {
                 y: 0,
                 ease: 'power1.inOut',
             })
-                .to(
-                    q('.hero-text-scroll'),
-                    {
-                        duration: 1,
-                        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-                        ease: 'circ.out',
-                    },
-                    '-=0.5',
-                )
                 .from(
                     titleSplit.chars,
                     {
@@ -56,6 +47,16 @@ const HeroSlide = () => {
                     },
                     '-=0.5',
                 )
+                .to(
+                    q('.hero-text-scroll'),
+                    {
+                        duration: 1,
+                        clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
+                        ease: 'circ.out',
+                    },
+                    '-=0.5',
+                )
+
                 .fromTo(
                     q('.hero-button'),
                     {
@@ -93,7 +94,7 @@ const HeroSlide = () => {
                             <h1>like a pro</h1>
                         </div>
                     </div>
-                    <div className='hero-button flex flex-wrap gap-3 hover:bg-milk transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ring) focus-visible:ring-offset-2'>
+                    <div className='hero-button '>
                         <Link href='/register'>Create your club</Link>
                     </div>
                 </div>

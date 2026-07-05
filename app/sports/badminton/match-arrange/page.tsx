@@ -184,7 +184,6 @@ const Page = () => {
                                         <div className='mt-5 grid gap-4 sm:grid-cols-2'>
                                             {Array.from({ length: matchType === 'doubles' ? 2 : 1 }, (_, index) => {
                                                 const player = team.players[index]
-                                                console.log('player', player)
 
                                                 if (!player) {
                                                     return (

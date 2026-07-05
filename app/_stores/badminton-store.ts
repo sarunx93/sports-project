@@ -458,7 +458,6 @@ export const createBadmintonStore = (initialWaitingList: Player[] = []) =>
                         }
 
                         const playersPerTeam = getPlayersPerTeam(state.matchTypes)
-                        console.log('playersPerTeam', playersPerTeam)
                         if (state.teams.A.length < playersPerTeam) {
                             return {
                                 waitingList: state.waitingList.filter((p) => p.id !== player.id),
