@@ -94,8 +94,17 @@ const HeroSlide = () => {
                             <h1>like a pro</h1>
                         </div>
                     </div>
-                    <div className='hero-button '>
-                        <Link href='/register'>Create your club</Link>
+                    <div>
+                        <Link
+                            href='/register'
+                            className={buttonClasses({
+                                variant: 'secondary',
+                                size: 'lg',
+                                className:
+                                    'hero-button border-0 bg-light-brown text-dark-brown md:mt-16 mt-10 md:px-16 px-10 hover:bg-milk',
+                            })}>
+                            <p className='uppercase font-bold text-lg '>Create your club</p>
+                        </Link>
                     </div>
                 </div>
             </div>
