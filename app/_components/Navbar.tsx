@@ -87,7 +87,7 @@ const Navbar = () => {
                         {currentUser ? (
                             <>
                                 <div className='hidden text-right md:block'>
-                                    <p className='text-sm font-medium text-foreground'>{currentUser.displayName}</p>
+                                    <p className='text-sm font-medium text-foreground'>{currentUser.userName}</p>
                                     <p className='text-xs text-(--muted)'>
                                         {currentUser.clubName ? currentUser.clubName : 'No club set yet'}
                                     </p>

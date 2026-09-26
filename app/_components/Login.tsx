@@ -4,7 +4,7 @@ import { SignInButton, SignUpButton, useSignIn, useSignUp } from '@clerk/nextjs'
 import { isClerkAPIResponseError } from '@clerk/nextjs/errors'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { FiArrowRight, FiCheck, FiEye, FiEyeOff, FiLock, FiMail, FiShield } from 'react-icons/fi'
 import { z } from 'zod'
 import logo from '@/public/sports_logo.png'
@@ -19,6 +19,7 @@ type LoginProps = {
 
 type CredentialFields = {
     email: string
+    name: string
     password: string
 }
 
@@ -30,6 +31,7 @@ const loginSchema = z.object({
 })
 
 const registerSchema = loginSchema.extend({
+    name: z.string().min(3, 'Name must be at least 3 characters long.'),
     password: z.string().min(8, 'Password must be at least 8 characters.').max(128, 'Password is too long.'),
 })
 
@@ -41,7 +43,7 @@ const verificationSchema = z.object({
 })
 
 const inputClasses =
-    'block w-full rounded-2xl border border-(--line) bg-white/90 py-3.5 pl-11 pr-12 text-sm text-(--foreground) outline-none transition placeholder:text-(--muted) focus:border-(--brand) focus:ring-4 focus:ring-(--ring)'
+    'block w-full rounded-2xl border border-(--line) bg-white/90 py-3.5 pl-11 pr-12 text-sm text-foreground outline-none transition placeholder:text-(--muted) focus:border-(--brand) focus:ring-4 focus:ring-(--ring)'
 
 function getClerkErrorMessage(error: unknown) {
     if (isClerkAPIResponseError(error)) {
@@ -60,7 +62,7 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
     const { signIn, fetchStatus: signInFetchStatus } = useSignIn()
     const { signUp, fetchStatus: signUpFetchStatus } = useSignUp()
     const [mode, setMode] = useState<AuthMode>(initialMode)
-    const [fields, setFields] = useState<CredentialFields>({ email: '', password: '' })
+    const [fields, setFields] = useState<CredentialFields>({ email: '', name: '', password: '' })
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
     const [formError, setFormError] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -146,6 +148,7 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
             const result = await signUp.password({
                 emailAddress: parsed.data.email,
                 password: parsed.data.password,
+                firstName: fields.name.trim(),
             })
 
             if (result.error) {
@@ -240,6 +243,14 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
         }
     }
 
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setFieldErrors({})
+        }, 3000)
+
+        return () => clearTimeout(timeoutId)
+    }, [fieldErrors])
+
     const clerkButton =
         mode === 'login' ? (
             <SignInButton mode='modal' forceRedirectUrl={redirectTo}>
@@ -324,18 +335,16 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
                                 <p className='mt-7 text-xs font-semibold uppercase tracking-[0.24em] text-(--brand)'>
                                     Check your inbox
                                 </p>
-                                <h2 className='mt-3 font-heading text-4xl font-semibold tracking-tight text-(--foreground)'>
+                                <h2 className='mt-3 font-heading text-4xl font-semibold tracking-tight text-foreground'>
                                     Verify your email
                                 </h2>
                                 <p className='mt-3 text-sm leading-6 text-(--muted)'>
                                     We sent a 6-digit code to{' '}
-                                    <span className='font-medium text-(--foreground)'>{verificationEmail}</span>.
+                                    <span className='font-medium text-foreground'>{verificationEmail}</span>.
                                 </p>
 
                                 <form onSubmit={handleVerificationSubmit} className='mt-8' noValidate>
-                                    <label
-                                        htmlFor='verification-code'
-                                        className='text-sm font-medium text-(--foreground)'>
+                                    <label htmlFor='verification-code' className='text-sm font-medium text-foreground'>
                                         Verification code
                                     </label>
                                     <input
@@ -353,7 +362,7 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
                                         }}
                                         aria-invalid={Boolean(fieldErrors.code)}
                                         aria-describedby={fieldErrors.code ? 'verification-code-error' : undefined}
-                                        className='mt-2 block w-full rounded-2xl border border-(--line) bg-white/90 px-4 py-4 text-center font-mono text-xl tracking-[0.5em] text-(--foreground) outline-none transition focus:border-(--brand) focus:ring-4 focus:ring-(--ring)'
+                                        className='mt-2 block w-full rounded-2xl border border-(--line) bg-white/90 px-4 py-4 text-center font-mono text-xl tracking-[0.5em] text-foreground outline-none transition focus:border-(--brand) focus:ring-4 focus:ring-(--ring)'
                                         placeholder='000000'
                                     />
                                     {fieldErrors.code ? (
@@ -380,7 +389,7 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
                                     <button
                                         type='button'
                                         onClick={() => setIsVerifying(false)}
-                                        className='cursor-pointer font-medium text-(--muted) hover:text-(--foreground)'>
+                                        className='cursor-pointer font-medium text-(--muted) hover:text-foreground'>
                                         Change email
                                     </button>
                                     <button
@@ -397,7 +406,7 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
                                 <p className='text-xs font-semibold uppercase tracking-[0.24em] text-(--brand)'>
                                     {mode === 'login' ? 'Welcome back' : 'Create your account'}
                                 </p>
-                                <h2 className='mt-3 font-heading text-4xl font-semibold tracking-tight text-(--foreground)'>
+                                <h2 className='mt-3 font-heading text-4xl font-semibold tracking-tight text-foreground'>
                                     {mode === 'login' ? 'Sign in to Match Desk' : 'Join Match Desk'}
                                 </h2>
                                 <p className='mt-3 text-sm leading-6 text-(--muted)'>
@@ -417,8 +426,8 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
                                             aria-pressed={mode === item}
                                             className={`cursor-pointer rounded-full px-4 py-2.5 text-sm font-medium capitalize transition ${
                                                 mode === item
-                                                    ? 'bg-white text-(--foreground) shadow-sm'
-                                                    : 'text-(--muted) hover:text-(--foreground)'
+                                                    ? 'bg-white text-foreground shadow-sm'
+                                                    : 'text-(--muted) hover:text-foreground'
                                             }`}>
                                             {item === 'login' ? 'Sign in' : 'Register'}
                                         </button>
@@ -426,8 +435,9 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
                                 </div>
 
                                 <form onSubmit={handleCredentialsSubmit} className='mt-7 space-y-5' noValidate>
+                                    {/* Email */}
                                     <div>
-                                        <label htmlFor='email' className='text-sm font-medium text-(--foreground)'>
+                                        <label htmlFor='email' className='text-sm font-medium text-foreground'>
                                             Email address
                                         </label>
                                         <div className='relative mt-2'>
@@ -454,11 +464,40 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
                                             </p>
                                         ) : null}
                                     </div>
+                                    {/* Name */}
+                                    {mode !== 'login' && (
+                                        <div>
+                                            <label htmlFor='name' className='text-sm font-medium text-foreground'>
+                                                Name
+                                            </label>
+                                            <div className='relative mt-2'>
+                                                <FiMail
+                                                    aria-hidden='true'
+                                                    className='absolute left-4 top-1/2 size-4 -translate-y-1/2 text-(--muted)'
+                                                />
+                                                <input
+                                                    id='name'
+                                                    name='name'
+                                                    type='name'
+                                                    autoComplete='name'
+                                                    value={fields.name}
+                                                    onChange={(event) => updateField('name', event.target.value)}
+                                                    aria-invalid={Boolean(fieldErrors.name)}
+                                                    aria-describedby={fieldErrors.name ? 'name-error' : undefined}
+                                                    className={inputClasses}
+                                                    placeholder='At least 3 characters'
+                                                />
+                                            </div>
+                                            {fieldErrors.name ? (
+                                                <p id='name-error' className='mt-2 text-sm text-(--danger)'>
+                                                    {fieldErrors.name}
+                                                </p>
+                                            ) : null}
+                                        </div>
+                                    )}
 
                                     <div>
-                                        <label
-                                            htmlFor='password'
-                                            className='text-sm font-medium text-(--foreground)'>
+                                        <label htmlFor='password' className='text-sm font-medium text-foreground'>
                                             Password
                                         </label>
                                         <div className='relative mt-2'>
@@ -483,7 +522,7 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
                                             <button
                                                 type='button'
                                                 onClick={() => setShowPassword((current) => !current)}
-                                                className='absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-(--muted) hover:text-(--foreground)'
+                                                className='absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer rounded-md p-1 text-(--muted) hover:text-foreground'
                                                 aria-label={showPassword ? 'Hide password' : 'Show password'}>
                                                 {showPassword ? (
                                                     <FiEyeOff aria-hidden='true' />
@@ -497,9 +536,7 @@ const Login = ({ initialMode = 'login', redirectTo = '/sports/badminton' }: Logi
                                                 {fieldErrors.password}
                                             </p>
                                         ) : mode === 'register' ? (
-                                            <p className='mt-2 text-xs text-(--muted)'>
-                                                Use 8 or more characters.
-                                            </p>
+                                            <p className='mt-2 text-xs text-(--muted)'>Use 8 or more characters.</p>
                                         ) : null}
                                     </div>
 

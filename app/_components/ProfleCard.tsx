@@ -6,6 +6,7 @@ import { buttonClasses } from './Button'
 
 const ProfleCard = () => {
     const currentUser = useUserStore((state) => state.currentUser)
+    console.log('currentUser', currentUser)
     return (
         <div className='mx-auto max-w-7xl px-4 py-10 sm:px-6'>
             <Card

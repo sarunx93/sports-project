@@ -34,9 +34,20 @@ export function UserStoreProvider({ children, initialState = defaultUserStoreSta
             clearPersistedBadmintonState()
             return
         }
+        const authenticatedUser = normalizeAuthenticatedUser(user)
+        const serverUser = initialState.currentUser
+
+        if (serverUser?.clerkUserId === user.id) {
+            // The server has loaded this user's MongoDB profile.
+            store.getState().setCurrentUser({
+                ...serverUser,
+                ...authenticatedUser!,
+            })
+            return
+        }
 
         store.getState().setAuthenticatedUser(normalizeAuthenticatedUser(user))
-    }, [isLoaded, isSignedIn, store, user])
+    }, [isLoaded, isSignedIn, store, user, initialState.currentUser])
 
     return <UserStoreContext.Provider value={store}>{children}</UserStoreContext.Provider>
 }

@@ -6,14 +6,12 @@ export type AuthenticatedUser = {
     firstName: string | null
     lastName: string | null
     fullName: string | null
-    username: string | null
+    userName: string | null
     emailAddress: string | null
     imageUrl: string | null
-    displayName: string | null
 }
 
 export type PersistedUserProfile = {
-    userName: string | null
     clubName: string | null
     email: string | null
     sports: Sport | null
@@ -27,7 +25,6 @@ type ClerkUserLike =
           firstName: string | null
           lastName: string | null
           fullName?: string | null
-          username?: string | null
           imageUrl?: string | null
           primaryEmailAddress?: {
               emailAddress: string
@@ -66,7 +63,6 @@ export const defaultUserStoreState: UserStoreState = {
 }
 
 export const defaultPersistedUserProfile: PersistedUserProfile = {
-    userName: null,
     clubName: null,
     email: null,
     sports: null,
@@ -74,7 +70,6 @@ export const defaultPersistedUserProfile: PersistedUserProfile = {
 
 export function normalizeUserProfile(user: DatabaseUserLike): PersistedUserProfile {
     return {
-        userName: user?.userName ?? null,
         clubName: user?.clubName ?? null,
         email: user?.email ?? null,
         sports: user?.sports ?? null,
@@ -86,22 +81,23 @@ export function normalizeAuthenticatedUser(user: ClerkUserLike): AuthenticatedUs
         return null
     }
 
-    const displayName =
-        user.fullName ?? user.firstName ?? user.username ?? user.primaryEmailAddress?.emailAddress ?? null
+    const displayName = user.fullName ?? user.firstName ?? user.primaryEmailAddress?.emailAddress ?? null
 
     return {
         clerkUserId: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         fullName: user.fullName ?? null,
-        username: user.username ?? null,
+        userName: displayName,
         emailAddress: user.primaryEmailAddress?.emailAddress ?? null,
         imageUrl: user.imageUrl ?? null,
-        displayName,
     }
 }
 
-export function mergeCurrentUser(authenticatedUser: ClerkUserLike, persistedUser: DatabaseUserLike): CurrentUser | null {
+export function mergeCurrentUser(
+    authenticatedUser: ClerkUserLike,
+    persistedUser: DatabaseUserLike,
+): CurrentUser | null {
     const normalizedAuthenticatedUser = normalizeAuthenticatedUser(authenticatedUser)
 
     if (!normalizedAuthenticatedUser) {

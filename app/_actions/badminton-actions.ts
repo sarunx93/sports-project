@@ -184,7 +184,7 @@ export async function createUser(prevState: CreateUserState, formData: FormData)
         },
         { upsert: true, new: true },
     )
-    redirect(`/sports/${sports.toLowerCase()}`)
+    // redirect(`/sports/${sports.toLowerCase()}`)
     return {
         ok: true,
         message: 'Club created successfully.',
