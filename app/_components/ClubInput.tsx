@@ -50,12 +50,13 @@ const ClubInput = () => {
                     Create the club profile that powers your sports pages.
                 </h1>
                 <p className='mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]'>
-                    Start with the club name and sport focus. The app can then route the user into the correct workspace.
+                    Start with the club name and sport focus. The app can then route the user into the correct
+                    workspace.
                 </p>
             </div>
 
             <div className='rounded-[24px] border border-dashed border-[var(--line)] bg-[var(--surface)] p-5'>
-                <p className='text-sm text-[var(--foreground)]'>Signed in as {currentUser?.displayName ?? 'there'}</p>
+                <p className='text-sm text-[var(--foreground)]'>Signed in as {currentUser?.userName ?? 'there'}</p>
                 {currentUser?.clubName ? (
                     <p className='mt-1 text-sm text-[var(--muted)]'>Existing club: {currentUser.clubName}</p>
                 ) : null}
@@ -75,7 +76,9 @@ const ClubInput = () => {
                         placeholder='Downtown Racquet Club'
                         defaultValue={clubNameDefaultValue}
                     />
-                    {state.errors.clubName ? <p className='mt-2 text-sm text-[var(--danger)]'>{state.errors.clubName}</p> : null}
+                    {state.errors.clubName ? (
+                        <p className='mt-2 text-sm text-[var(--danger)]'>{state.errors.clubName}</p>
+                    ) : null}
                 </div>
 
                 <div className='md:col-span-2'>
@@ -91,7 +94,9 @@ const ClubInput = () => {
                         <option value='Tennis'>Tennis</option>
                         <option value='Football'>Football</option>
                     </select>
-                    {state.errors.sports ? <p className='mt-2 text-sm text-[var(--danger)]'>{state.errors.sports}</p> : null}
+                    {state.errors.sports ? (
+                        <p className='mt-2 text-sm text-[var(--danger)]'>{state.errors.sports}</p>
+                    ) : null}
                 </div>
 
                 <div className='md:col-span-2'>
