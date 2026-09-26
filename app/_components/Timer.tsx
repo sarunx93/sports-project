@@ -75,6 +75,7 @@ const Timer = ({ match }: TimerProps) => {
             scoreB: validatedMatch?.scoreB ?? '',
             winner: validatedMatch?.winner || 'undefined',
         })
+        console.log('result', result)
         if (!result.ok) {
             setIsSaving(false)
             setSaveMessage(result.message)

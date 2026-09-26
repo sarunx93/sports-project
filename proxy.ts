@@ -1,21 +1,17 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-// const isPublicRoute = createRouteMatcher(['/', '/sports(.*)', '/contact'])
-const isProtectedBadmintonRoute = createRouteMatcher([
+const isProtectedRoute = createRouteMatcher([
+    '/register(.*)',
+    '/sports/badminton/dashboard(.*)',
     '/sports/badminton/match-arrange(.*)',
     '/sports/badminton/all-matches(.*)',
 ])
 
 export default clerkMiddleware(async (auth, req) => {
-    if (isProtectedBadmintonRoute(req)) {
+    if (isProtectedRoute(req)) {
         await auth.protect()
-        return
     }
-
-    // if (!isPublicRoute(req)) {
-    //     await auth.protect()
-    // }
-})
+}, { signInUrl: '/login' })
 
 export const config = {
     matcher: [

@@ -2,14 +2,21 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { SignInButton, UserButton } from '@clerk/nextjs'
+import { UserButton } from '@clerk/nextjs'
 import { useUserStore } from '../_providers/user-store-provider'
 import { buttonClasses } from './Button'
 import logo from '@/public/sports_logo.png'
+import { useState } from 'react'
 
 const Navbar = () => {
     const currentUser = useUserStore((state) => state.currentUser)
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
+    const dropdownLinks = [
+        { href: '/sports/badminton', label: 'Explore Badminton' },
+        { href: '/sports/tennis', label: 'Explore Tennis' },
+        { href: '/register', label: 'Create a Club' },
+    ]
     const navLinks = [
         { href: '/', label: 'Home' },
         { href: '/sports/badminton', label: 'Badminton' },
@@ -52,6 +59,28 @@ const Navbar = () => {
                                 </Link>
                             </li>
                         ))}
+                        {/* <li className='relative'>
+                            <button
+                                type='button'
+                                aria-expanded={isDropdownOpen}
+                                aria-controls='navbar-explore-links'
+                                onClick={() => setIsDropdownOpen((open) => !open)}
+                                className='flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-(--muted) transition hover:bg-white/80 hover:text-foreground'>
+                                Explore
+                                <span
+                                    aria-hidden='true'
+                                    className={`text-xs transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}>
+                                    ▼
+                                </span>
+                            </button>
+                            <ul
+                                id='navbar-explore-links'
+                                className='absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-white/70 bg-[#f5efe7] p-2 shadow-lg'>
+                                {dropdownLinks.map((link) => (
+                                    <li key={link.href}>{link.label}</li>
+                                ))}
+                            </ul>
+                        </li> */}
                     </ul>
 
                     <div className='flex items-center gap-3'>
@@ -66,11 +95,9 @@ const Navbar = () => {
                                 <UserButton />
                             </>
                         ) : (
-                            <SignInButton mode='modal' forceRedirectUrl='/register'>
-                                <button type='button' className={buttonClasses({ size: 'sm' })}>
-                                    Sign in
-                                </button>
-                            </SignInButton>
+                            <Link href='/login' className={buttonClasses({ size: 'sm' })}>
+                                Sign in
+                            </Link>
                         )}
                     </div>
                 </div>

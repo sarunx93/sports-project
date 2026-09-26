@@ -2,32 +2,7 @@ import 'server-only'
 
 import { Schema, model, models, type InferSchemaType } from 'mongoose'
 
-const playerSchema = new Schema(
-    {
-        id: {
-            type: Number,
-            required: true,
-        },
-        name: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        lastName: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        level: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-    },
-    {
-        _id: false,
-    },
-)
+export const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const
 
 const userSchema = new Schema({
     userName: {
@@ -55,16 +30,16 @@ const userSchema = new Schema({
         enum: ['Badminton', 'Tennis', 'Football'],
         required: true,
     },
-    matches: [
+    stats: {
+        numPlayers: { average: Number, latest: Number },
+        numShuttles: { average: Number, latest: Number },
+    },
+    schedule: [
         {
-            type: Schema.Types.ObjectId,
-            ref: 'Match',
+            day: { type: String, enum: DAYS_OF_WEEK, required: true },
+            time: { type: String, required: true },
         },
     ],
-    players: {
-        type: [playerSchema],
-        default: [],
-    },
 })
 
 export type UserDocument = InferSchemaType<typeof userSchema>

@@ -8,16 +8,9 @@ import { UserStoreProvider } from './_providers/user-store-provider'
 import { mergeCurrentUser } from './_stores/user-store'
 import UserModel from '@/models/User'
 import { connectMongoose } from './_lib/mongoose'
+import Footer from './_components/Footer'
 
-// const inter = Inter({
-//     variable: '--font-inter',
-//     subsets: ['latin'],
-// })
 
-// const montserrat = Montserrat({
-//     variable: '--font-montserrat',
-//     subsets: ['latin'],
-// })
 
 const geistMono = Geist_Mono({
     variable: '--font-geist-mono',
@@ -55,13 +48,14 @@ export default async function RootLayout({
     }
 
     return (
-        <ClerkProvider>
+        <ClerkProvider signInUrl='/login' signUpUrl='/login?mode=register'>
             <html lang='en'>
                 <body
-                    className={`${sans.variable} ${heading.variable} ${geistMono.variable} flex h-dvh flex-col antialiased`}>
+                    className={`${sans.variable} ${heading.variable} ${geistMono.variable} flex min-h-dvh flex-col antialiased`}>
                     <UserStoreProvider initialState={{ currentUser: mergeCurrentUser(clerkUser, currentUserProfile) }}>
                         <Navbar />
                         <main className='flex-1 min-h-0 overflow-y-auto'>{children}</main>
+                        <Footer />
                     </UserStoreProvider>
                 </body>
             </html>

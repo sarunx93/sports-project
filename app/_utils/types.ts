@@ -14,3 +14,8 @@ export type CreateUserInput = {
     clubName: string
     sports: Sport
 }
+
+export type ClubSchedule = {
+    day: string
+    time: string
+}

@@ -175,8 +175,11 @@ export async function createUser(prevState: CreateUserState, formData: FormData)
             },
             $setOnInsert: {
                 clerkUserId: userId,
-                matches: [],
-                players: [],
+                stats: {
+                    numPlayers: { average: 0, latest: 0 },
+                    numShuttles: { average: 0, latest: 0 },
+                },
+                schedule: [],
             },
         },
         { upsert: true, new: true },
