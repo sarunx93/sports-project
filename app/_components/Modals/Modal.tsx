@@ -1,7 +1,6 @@
 'use client'
 
-import { ValidatedBadmintonMatch } from '../_utils/badminton-score'
-import Button from './Button'
+import Button from '../Button'
 
 type ConfirmModalProps = {
     isOpen: boolean
@@ -26,7 +25,7 @@ export default function ConfirmModal({
 
     return (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-[rgba(18,32,51,0.48)] px-4 backdrop-blur-sm'>
-            <div className='w-full max-w-md rounded-[28px] border border-white/70 bg-[var(--surface-strong)] p-6 shadow-[0_30px_80px_-42px_rgba(15,23,42,0.55)]'>
+            <div className='w-full max-w-md rounded-[28px] border border-white/70 bg-(--surface-strong) p-6 shadow-[0_30px_80px_-42px_rgba(15,23,42,0.55)]'>
                 <h2 className='text-xl font-semibold text-[var(--foreground)]'>{title}</h2>
                 <p className='mt-3 text-sm leading-7 text-[var(--muted)]'>{message}</p>
 

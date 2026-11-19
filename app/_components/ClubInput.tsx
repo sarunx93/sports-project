@@ -1,17 +1,24 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createUser, CreateUserState } from '../_actions/badminton-actions'
 import { useUserStore } from '../_providers/user-store-provider'
 import Card from './Card'
 import Button from './Button'
+import { DAYS_OF_WEEK } from '../_utils/constant'
 
 const initialState: CreateUserState = {
     ok: false,
     message: '',
     userProfile: null,
     errors: {},
+}
+type DayName = (typeof DAYS_OF_WEEK)[number]['en']['full']
+type Session = {
+    day: string
+    startTime: string
+    endTime: string
 }
 
 const ClubInput = () => {
@@ -21,6 +28,25 @@ const ClubInput = () => {
     const router = useRouter()
     const clubNameDefaultValue = state.ok ? '' : (currentUser?.clubName ?? '')
     const clubNameInputKey = state.ok ? 'cleared-club-name' : `club-name-${currentUser?.clubName ?? 'empty'}`
+    const [schedule, setSchedule] = useState<Session[]>([])
+
+    //set day
+    const toggleDay = (day: string) => {
+        setSchedule((prev) =>
+            prev.some((item) => item.day === day)
+                ? prev.filter((item) => item.day !== day)
+                : [...prev, { day, startTime: '', endTime: '' }],
+        )
+    }
+
+    //set time
+    const setStartTime = (day: string, startTime: string) => {
+        setSchedule((prev) => prev.map((item) => (item.day === day ? { ...item, startTime } : item)))
+    }
+    const setEndTime = (day: string, endTime: string) => {
+        setSchedule((prev) => prev.map((item) => (item.day === day ? { ...item, endTime } : item)))
+    }
+
     const currentSportHref =
         currentUser?.sports === 'Badminton'
             ? '/sports/badminton'
@@ -98,7 +124,57 @@ const ClubInput = () => {
                         <p className='mt-2 text-sm text-[var(--danger)]'>{state.errors.sports}</p>
                     ) : null}
                 </div>
-
+                <div className='md:col-span-2'>
+                    <label htmlFor='days' className='text-sm font-medium text-[var(--foreground)]'>
+                        Session day(s) เลือกได้มากกว่า 1 วัน
+                    </label>
+                    <div className={`flex justify-around mt-3`}>
+                        {DAYS_OF_WEEK.map((day, i) => {
+                            return (
+                                <Button
+                                    variant={
+                                        schedule.map((item) => item.day).includes(day.en.full) ? 'selected' : 'primary'
+                                    }
+                                    key={i}
+                                    onClick={() => toggleDay(day.en.full)}>
+                                    {day.en.short}
+                                </Button>
+                            )
+                        })}
+                    </div>
+                    {Object.hasOwn(schedule[0] || {}, 'day') &&
+                        schedule.map((item, i) => {
+                            return (
+                                <div className='md:flex my-6' key={i}>
+                                    <h3 className='mr-3'>{item.day}</h3>
+                                    <div>
+                                        <label htmlFor={`start-time-${item.day}`}>เวลาเริ่ม</label>
+                                        <input
+                                            id='start-time'
+                                            type='time'
+                                            name='start-time'
+                                            onChange={(e) => {
+                                                setStartTime(item.day, e.target.value)
+                                            }}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor={`end-time-${item.day}`}>เวลาจบ</label>
+                                        <input
+                                            id='end-time'
+                                            type='time'
+                                            name='end-time'
+                                            onChange={(e) => {
+                                                setEndTime(item.day, e.target.value)
+                                            }}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            )
+                        })}
+                </div>
                 <div className='md:col-span-2'>
                     <Button type='submit' fullWidth size='lg'>
                         {pending ? 'Submitting...' : 'Create your club'}
@@ -110,6 +186,7 @@ const ClubInput = () => {
                         {state.message}
                     </p>
                 ) : null}
+                <input type='hidden' name='schedule' value={JSON.stringify(schedule)} />
             </form>
         </Card>
     )

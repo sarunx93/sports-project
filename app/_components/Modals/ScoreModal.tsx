@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { validateBadmintonMatch, type ValidatedBadmintonMatch } from '../_utils/badminton-score'
-import Button from './Button'
+import { validateBadmintonMatch, type ValidatedBadmintonMatch } from '../../_utils/badminton-score'
+import Button from '../Button'
 import ConfirmModal from './Modal'
 
 type ScoreModalModalProps = {

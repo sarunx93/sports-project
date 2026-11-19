@@ -1,11 +1,10 @@
 import { currentUser } from '@clerk/nextjs/server'
-import Link from 'next/link'
 import Card from '@/app/_components/Card'
-import { buttonClasses } from '@/app/_components/Button'
 import ProfleCard from '@/app/_components/ProfleCard'
 
 const page = async () => {
     const user = await currentUser()
+
     if (!user) {
         return (
             <div className='mx-auto flex min-h-full max-w-3xl items-center px-4 py-12 sm:px-6'>

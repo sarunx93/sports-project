@@ -9,7 +9,32 @@ import { validateBadmintonMatch } from '@/app/_utils/badminton-score'
 import MatchModel from '@/models/Match'
 import UserModel from '@/models/User'
 import { auth, currentUser } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
+
+type SessionCountStats = {
+    avg: number
+    latest: number
+    sessionCount: number
+}
+
+export type ClubStats = {
+    numPlayers: SessionCountStats
+    numShuttles: SessionCountStats
+}
+
+export type ClubStatsResponse = {
+    stats: ClubStats
+}
+
+export type RecordSessionResult =
+    | {
+          ok: true
+          numPlayers: SessionCountStats
+          numShuttles: SessionCountStats
+      }
+    | {
+          ok: false
+          message: string
+      }
 
 export type RecordMatchResult =
     | {
@@ -41,6 +66,18 @@ export type AddPlayerToClubResult =
           ok: false
           message: string
       }
+
+export async function getClubStats(): Promise<ClubStatsResponse | null> {
+    const user = await currentUser()
+    if (!user) {
+        return null
+    }
+    const { id } = user
+
+    const clubStats = await UserModel.findOne({ clerkUserId: id })
+    const { stats } = clubStats
+    return stats
+}
 
 export async function recordMatch(match: EndedMatch): Promise<RecordMatchResult> {
     const user = await currentUser()
@@ -118,7 +155,13 @@ export async function recordMatch(match: EndedMatch): Promise<RecordMatchResult>
 export async function createUser(prevState: CreateUserState, formData: FormData) {
     const clubName = String(formData.get('clubName') ?? '').trim()
     const sports = String(formData.get('sports') ?? '').trim() as Sport
-
+    let schedule = formData.get('schedule')
+    console.log(schedule)
+    try {
+        schedule = JSON.parse(String(schedule))
+    } catch {
+        schedule = null
+    }
     if (!clubName) {
         return {
             ok: false,
@@ -172,19 +215,19 @@ export async function createUser(prevState: CreateUserState, formData: FormData)
                 clubName,
                 sports,
                 email,
+                schedule,
             },
             $setOnInsert: {
                 clerkUserId: userId,
                 stats: {
-                    numPlayers: { average: 0, latest: 0 },
-                    numShuttles: { average: 0, latest: 0 },
+                    numPlayers: { avg: 0, latest: 0, sessionCount: 0 },
+                    numShuttles: { avg: 0, latest: 0, sessionCount: 0 },
                 },
-                schedule: [],
             },
         },
         { upsert: true, new: true },
     )
-    
+
     return {
         ok: true,
         message: 'Club created successfully.',
@@ -236,4 +279,93 @@ export async function getWaitingPlayers(userId: string): Promise<Player[]> {
     const user = await UserModel.findOne({ clerkUserId: userId }, { players: 1, _id: 0 }).lean<{ players?: Player[] }>()
 
     return user?.players ?? []
+}
+
+function buildSessionCountUpdate(field: 'numPlayers' | 'numShuttles', latest: number) {
+    return {
+        $let: {
+            vars: {
+                oldAverage: { $ifNull: [`$stats.${field}.avg`, 0] },
+                oldSessionCount: { $ifNull: [`$stats.${field}.sessionCount`, 0] },
+            },
+            in: {
+                latest,
+                avg: {
+                    $divide: [
+                        {
+                            $add: [{ $multiply: ['$$oldAverage', '$$oldSessionCount'] }, latest],
+                        },
+                        { $add: ['$$oldSessionCount', 1] },
+                    ],
+                },
+                sessionCount: { $add: ['$$oldSessionCount', 1] },
+            },
+        },
+    }
+}
+
+export async function recodeSession(
+    latestPlayerCount: number,
+    latestShuttlesCount: number,
+): Promise<RecordSessionResult> {
+    const { userId } = await auth()
+
+    if (!userId) {
+        return {
+            ok: false,
+            message: 'Unauthorized',
+        }
+    }
+
+    if (
+        !Number.isSafeInteger(latestPlayerCount) ||
+        !Number.isSafeInteger(latestShuttlesCount) ||
+        latestPlayerCount < 1 ||
+        latestShuttlesCount < 1
+    ) {
+        return {
+            ok: false,
+            message: 'จำนวนผู้เล่นและจำนวนลูกต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป',
+        }
+    }
+
+    try {
+        await connectMongoose()
+        const user = await UserModel.findOneAndUpdate(
+            {
+                clerkUserId: userId,
+            },
+            [
+                {
+                    $set: {
+                        'stats.numPlayers': buildSessionCountUpdate('numPlayers', latestPlayerCount),
+                        'stats.numShuttles': buildSessionCountUpdate('numShuttles', latestShuttlesCount),
+                    },
+                },
+            ],
+            { returnDocument: 'after', updatePipeline: true },
+        ).lean<{
+            stats: {
+                numPlayers: SessionCountStats
+                numShuttles: SessionCountStats
+            }
+        }>()
+
+        if (!user) {
+            return {
+                ok: false,
+                message: 'Club not found',
+            }
+        }
+        return {
+            ok: true,
+            numPlayers: user.stats.numPlayers,
+            numShuttles: user.stats.numShuttles,
+        }
+    } catch (error) {
+        return {
+            ok: false,
+            message: error instanceof Error ? error.message : 'Unable to record session.',
+        }
+    }
 }

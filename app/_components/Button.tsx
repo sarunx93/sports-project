@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from 'react'
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'selected'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 type ButtonClassOptions = {
@@ -31,6 +31,7 @@ export function buttonClasses({
             'border border-[var(--line)] bg-white/88 shadow-[0_10px_30px_-22px_rgba(15,23,42,0.45)] hover:bg-milk',
         ghost: 'text-[var(--foreground)] hover:bg-white/70',
         danger: 'bg-[var(--danger)] text-white shadow-[0_18px_45px_-22px_rgba(220,38,38,0.85)] hover:bg-[#b91c1c]',
+        selected: 'bg-cyan-500',
     }
 
     const sizeClasses: Record<ButtonSize, string> = {

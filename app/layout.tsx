@@ -10,8 +10,6 @@ import UserModel from '@/models/User'
 import { connectMongoose } from './_lib/mongoose'
 import Footer from './_components/Footer'
 
-
-
 const geistMono = Geist_Mono({
     variable: '--font-geist-mono',
     subsets: ['latin'],

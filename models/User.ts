@@ -4,6 +4,57 @@ import { Schema, model, models, type InferSchemaType } from 'mongoose'
 
 export const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const
 
+const numPlayersSchema = new Schema(
+    {
+        avg: {
+            type: Number,
+            required: true,
+            default: 0,
+            min: 0,
+        },
+        latest: {
+            type: Number,
+            required: true,
+            default: 0,
+            min: 0,
+        },
+        sessionCount: {
+            type: Number,
+            required: true,
+            default: 0,
+            min: 0,
+        },
+    },
+    {
+        _id: false,
+    },
+)
+const numShuttlesSchema = new Schema(
+    {
+        avg: {
+            type: Number,
+            required: true,
+            default: 0,
+            min: 0,
+        },
+        latest: {
+            type: Number,
+            required: true,
+            default: 0,
+            min: 0,
+        },
+        sessionCount: {
+            type: Number,
+            required: true,
+            default: 0,
+            min: 0,
+        },
+    },
+    {
+        _id: false,
+    },
+)
+
 const userSchema = new Schema({
     userName: {
         type: String,
@@ -31,13 +82,28 @@ const userSchema = new Schema({
         required: true,
     },
     stats: {
-        numPlayers: { average: Number, latest: Number },
-        numShuttles: { average: Number, latest: Number },
+        numPlayers: {
+            type: numPlayersSchema,
+            default: () => ({
+                avg: 0,
+                latest: 0,
+                sessionCount: 0,
+            }),
+        },
+        numShuttles: {
+            type: numShuttlesSchema,
+            default: () => ({
+                avg: 0,
+                latest: 0,
+                sessionCount: 0,
+            }),
+        },
     },
     schedule: [
         {
             day: { type: String, enum: DAYS_OF_WEEK, required: true },
-            time: { type: String, required: true },
+            startTime: { type: String, required: true },
+            endTime: { type: String, required: true },
         },
     ],
 })

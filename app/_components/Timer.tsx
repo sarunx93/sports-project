@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
+
 import { DEFAULT_MATCH_TIMER_STATE, getElapsedMatchTimerMs, type PlayingMatches } from '../_stores/badminton-store'
 import { useBadmintonStore } from '../_providers/badminton-store-provider'
 import { recordMatch } from '../_actions/badminton-actions'
-import ScoreModal from './ScoreModal'
+const ScoreModal = dynamic(() => import('./Modals/ScoreModal'))
 import type { ValidatedBadmintonMatch } from '../_utils/badminton-score'
 import Button from './Button'
 
@@ -166,15 +168,17 @@ const Timer = ({ match }: TimerProps) => {
 
             {saveMessage ? <p className='mt-4 text-sm text-(--muted)'>{saveMessage}</p> : null}
 
-            <ScoreModal
-                isOpen={isModalOpen}
-                onSetA={setScoreA}
-                onSetB={setScoreB}
-                onConfirm={handleFinish}
-                onCancel={() => setIsModalOpen(false)}
-                scoreA={scoreA}
-                scoreB={scoreB}
-            />
+            {isModalOpen && (
+                <ScoreModal
+                    isOpen={isModalOpen}
+                    onSetA={setScoreA}
+                    onSetB={setScoreB}
+                    onConfirm={handleFinish}
+                    onCancel={() => setIsModalOpen(false)}
+                    scoreA={scoreA}
+                    scoreB={scoreB}
+                />
+            )}
         </div>
     )
 }

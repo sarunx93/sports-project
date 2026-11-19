@@ -3,10 +3,15 @@ import Link from 'next/link'
 import { useUserStore } from '../_providers/user-store-provider'
 import Card from './Card'
 import { buttonClasses } from './Button'
-
+import { getClubStats } from '../_actions/badminton-actions'
+import { useEffect } from 'react'
 const ProfleCard = () => {
     const currentUser = useUserStore((state) => state.currentUser)
-    console.log('currentUser', currentUser)
+
+    useEffect(() => {
+        getClubStats()
+    }, [])
+
     return (
         <div className='mx-auto max-w-7xl px-4 py-10 sm:px-6'>
             <Card

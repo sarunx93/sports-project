@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useBadmintonStore } from '../_providers/badminton-store-provider'
 import PlayerListCard from './PlayerListCard'
-import ConfirmModal from './Modal'
+import ConfirmModal from './Modals/Modal'
 import Card from './Card'
 import Button from './Button'
 

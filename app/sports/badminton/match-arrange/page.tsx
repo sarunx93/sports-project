@@ -13,6 +13,7 @@ import CardSection from '@/app/_components/CardSection'
 import { buttonClasses } from '@/app/_components/Button'
 import Button from '@/app/_components/Button'
 import Input from '@/app/_components/Input'
+import EndSessionModal from '@/app/_components/Modals/EndSessionModal'
 
 type TeamName = 'A' | 'B'
 
@@ -51,6 +52,7 @@ function DroppablePlayerSlot({ player, team, slotIndex, onRemove }: DroppablePla
 const Page = () => {
     const [isSingles, setIsSingles] = useState<boolean>(false)
     const [courtNumber, setCourtNumber] = useState<string>('')
+    const [isEndSessionOpen, setIsEndSessionOpen] = useState<boolean>(false)
 
     const waitingList = useBadmintonStore((s) => s.waitingList)
     const playingMatches = useBadmintonStore((s) => s.playingMatches)
@@ -66,7 +68,10 @@ const Page = () => {
     const removePlayerFromMatch = useBadmintonStore((s) => s.removePlayerFromMatch)
     const startMatch = useBadmintonStore((s) => s.startMatch)
     const setMatchType = useBadmintonStore((s) => s.setMatchType)
+
+    //derived states
     const isMatchReady = teamA.length && teamB.length && courtNumber && !isCourtInUse
+    const canEndSession = playingMatches.length === 0
 
     const handleToggle = () => {
         setIsSingles((prev) => !prev)
@@ -211,7 +216,7 @@ const Page = () => {
                             </div>
                         </DragDropProvider>
 
-                        <div className='mt-8 flex flex-col gap-4 rounded-[24px] border border-white/80 bg-[var(--surface)] p-5 sm:flex-row sm:items-center sm:justify-between'>
+                        <div className='mt-8 flex flex-col gap-4 rounded-[24px] border border-white/80 bg-(--surface) p-5 sm:flex-row sm:items-center sm:justify-between'>
                             <div>
                                 <p className='text-lg font-semibold text-[var(--foreground)]'>
                                     {isMatchReady ? 'Ready to start the match.' : 'Each team needs two players.'}
@@ -230,9 +235,24 @@ const Page = () => {
                                 Start Match
                             </button>
                         </div>
+                        <Button
+                            disabled={!canEndSession}
+                            onClick={() => {
+                                setIsEndSessionOpen(true)
+                            }}>
+                            End Session
+                        </Button>
                     </Card>
                 </div>
             </CardSection>
+            {isEndSessionOpen && (
+                <EndSessionModal
+                    setIsOpen={setIsEndSessionOpen}
+                    onCancel={() => {
+                        setIsEndSessionOpen(false)
+                    }}
+                />
+            )}
         </div>
     )
 }
