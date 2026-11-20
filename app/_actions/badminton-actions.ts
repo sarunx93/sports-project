@@ -2,7 +2,7 @@
 
 import type { EndedMatch } from '@/app/_stores/badminton-store'
 import { sports, type Player } from '@/app/_utils/constants'
-import type { PersistedUserProfile } from '@/app/_stores/user-store'
+import type { PersistedUserProfile, Session } from '@/app/_stores/user-store'
 import type { Sport } from '@/app/_utils/types'
 import { connectMongoose } from '@/app/_lib/mongoose'
 import { validateBadmintonMatch } from '@/app/_utils/badminton-score'
@@ -175,7 +175,7 @@ export async function getUser() {
         return {
             clubName: fetchedUser?.clubName,
             username: fetchedUser.userName,
-            schedule: (fetchedUser.schedule ?? []).map((session) => ({
+            schedule: (fetchedUser.schedule ?? []).map((session: Session) => ({
                 day: session.day,
                 startTime: session.startTime,
                 endTime: session.endTime,
