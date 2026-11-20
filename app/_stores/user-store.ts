@@ -3,18 +3,33 @@ import { createStore } from 'zustand'
 
 export type AuthenticatedUser = {
     clerkUserId: string
-    firstName: string | null
-    lastName: string | null
     fullName: string | null
     userName: string | null
-    emailAddress: string | null
+    email: string | null
     imageUrl: string | null
+}
+
+export type Session = {
+    day: string
+    startTime: string
+    endTime: string
+}
+
+export type SessionStats = {
+    avg: number
+    latest: number
+    sessionCount: number
 }
 
 export type PersistedUserProfile = {
     clubName: string | null
     email: string | null
     sports: Sport | null
+    stats: {
+        numPlayers: SessionStats
+        numShuttles: SessionStats
+    }
+    schedule: Session[]
 }
 
 export type CurrentUser = AuthenticatedUser & PersistedUserProfile
@@ -39,6 +54,11 @@ type DatabaseUserLike =
           clubName?: string | null
           email?: string | null
           sports?: Sport | null
+          stats?: {
+              numPlayers?: SessionStats | null
+              numShuttles?: SessionStats | null
+          } | null
+          schedule?: Session[] | null
       }
     | null
     | undefined
@@ -66,6 +86,11 @@ export const defaultPersistedUserProfile: PersistedUserProfile = {
     clubName: null,
     email: null,
     sports: null,
+    stats: {
+        numPlayers: { avg: 0, latest: 0, sessionCount: 0 },
+        numShuttles: { avg: 0, latest: 0, sessionCount: 0 },
+    },
+    schedule: [],
 }
 
 export function normalizeUserProfile(user: DatabaseUserLike): PersistedUserProfile {
@@ -73,6 +98,23 @@ export function normalizeUserProfile(user: DatabaseUserLike): PersistedUserProfi
         clubName: user?.clubName ?? null,
         email: user?.email ?? null,
         sports: user?.sports ?? null,
+        stats: {
+            numPlayers: {
+                avg: user?.stats?.numPlayers?.avg ?? 0,
+                latest: user?.stats?.numPlayers?.latest ?? 0,
+                sessionCount: user?.stats?.numPlayers?.sessionCount ?? 0,
+            },
+            numShuttles: {
+                avg: user?.stats?.numShuttles?.avg ?? 0,
+                latest: user?.stats?.numShuttles?.latest ?? 0,
+                sessionCount: user?.stats?.numShuttles?.sessionCount ?? 0,
+            },
+        },
+        schedule: (user?.schedule ?? []).map((session) => ({
+            day: session.day,
+            startTime: session.startTime,
+            endTime: session.endTime,
+        })),
     }
 }
 
@@ -85,11 +127,9 @@ export function normalizeAuthenticatedUser(user: ClerkUserLike): AuthenticatedUs
 
     return {
         clerkUserId: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
         fullName: user.fullName ?? null,
         userName: displayName,
-        emailAddress: user.primaryEmailAddress?.emailAddress ?? null,
+        email: user.primaryEmailAddress?.emailAddress ?? null,
         imageUrl: user.imageUrl ?? null,
     }
 }

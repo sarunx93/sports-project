@@ -1,0 +1,106 @@
+<style>
+#club-form-preview { --cp-bg:light-dark(#f5efe7,#201e1a); --cp-panel:light-dark(#ffffff,#2b2925); --cp-text:light-dark(#20352f,#eeeae2); --cp-muted:light-dark(#65736c,#b6beb6); --cp-line:light-dark(#e0e5dc,#494b43); --cp-brand:light-dark(#0f766e,#78d7c2); --cp-onbrand:light-dark(#ffffff,#123c33); color:var(--cp-text); font-family:system-ui,sans-serif; font-size:15px; }
+#club-form-preview * { box-sizing:border-box; }
+#club-form-preview .preview-bar {display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:12px 100px 14px 0; }
+#club-form-preview button {font:inherit; cursor:pointer; border:1px solid var(--cp-line); border-radius:24px; padding:10px 18px; min-height:44px; background:var(--cp-panel);color:var(--cp-text);}
+#club-form-preview button[aria-pressed=true], #club-form-preview .primary {background:var(--cp-brand);color:var(--cp-onbrand); border-color:var(--cp-brand);}
+#club-form-preview .stage {background:var(--cp-bg);padding:24px;border-radius:24px;}
+#club-form-preview .brand {font-size:13px;letter-spacing:2px;color:var(--cp-brand);font-weight:600;margin:0 0 16px;}
+#club-form-preview .surface {background:var(--cp-panel);border:1px solid var(--cp-line);border-radius:24px;padding:28px;}
+#club-form-preview h2 {font-size:26px;line-height:1.4;margin:0 0 8px;font-weight:600;}
+#club-form-preview p {margin:0;color:var(--cp-muted);line-height:1.6;}
+#club-form-preview form {display:grid;gap:22px;margin-top:24px;}
+#club-form-preview label, #club-form-preview legend {font-weight:500;}
+#club-form-preview input:not([type=checkbox]), #club-form-preview select {font:inherit;font-size:16px;min-width:0;width:100%;border:1px solid var(--cp-line);border-radius:14px;padding:12px;background:var(--cp-panel);color:var(--cp-text);margin-top:8px;}
+#club-form-preview fieldset {border:0;padding:0;margin:0;min-width:0;}
+#club-form-preview .days {display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+#club-form-preview .days label {display:flex;align-items:center;gap:5px;border:1px solid var(--cp-line);border-radius:12px;padding:9px;min-height:44px;}
+#club-form-preview input[type=checkbox] {accent-color:var(--cp-brand);width:17px;height:17px;}
+#club-form-preview .time-row {display:grid;grid-template-columns:75px 1fr 1fr;gap:12px;align-items:center;margin-top:16px;}
+#club-form-preview .time-row label {font-size:13px;color:var(--cp-muted);}
+#club-form-preview .actions {border-top:1px solid var(--cp-line);padding-top:20px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
+#club-form-preview #cp-status {color:var(--cp-brand);}
+#club-form-preview [hidden] {display:none!important;}
+@media(max-width:480px) {#club-form-preview .stage {padding:14px;} #club-form-preview .surface {padding:18px;} #club-form-preview .time-row {grid-template-columns:1fr 1fr;} #club-form-preview .time-row > span {grid-column:1/-1;} }
+</style>
+<div id="club-form-preview">
+  <div class="preview-bar" aria-label="เลือกโหมดตัวอย่าง">
+    <button type="button" data-mode="create" aria-pressed="false">Create · สร้างก๊วน</button>
+    <button type="button" data-mode="edit" aria-pressed="true">Edit · แก้ไขก๊วน</button>
+  </div>
+  <div class="stage">
+    <div class="brand">MATCH DESK / CLUB PROFILE</div>
+    <section class="surface" aria-label="ฟอร์มข้อมูลก๊วน">
+      <h2 id="cp-title">แก้ไขข้อมูลก๊วน</h2>
+      <p id="cp-description">อัปเดตชื่อก๊วน กีฬา และตารางเล่นของคุณ</p>
+      <form id="cp-form">
+        <label for="cp-name">ชื่อก๊วน<input id="cp-name" name="clubName" required maxlength="100" placeholder="เช่น ก๊วนตีหลังเลิกงาน" value="ก๊วนตีหลังเลิกงาน"></label>
+        <label for="cp-sport">กีฬาหลัก<select id="cp-sport" name="sports"><option>Badminton</option><option>Tennis</option><option>Football</option></select></label>
+        <fieldset><legend>วันเล่น <span style="color:var(--cp-muted);font-weight:400">· เลือกได้มากกว่า 1 วัน</span></legend>
+          <div class="days" id="cp-days"></div>
+          <div id="cp-times"></div>
+        </fieldset>
+        <p id="cp-status" role="status" aria-live="polite"></p>
+        <div class="actions"><button id="cp-cancel" type="button">ยกเลิก</button><button class="primary" type="submit" id="cp-submit">บันทึกการเปลี่ยนแปลง</button></div>
+      </form>
+    </section>
+  </div>
+</div>
+<script>
+(() => {
+const root = document.getElementById('club-form-preview');
+const form = root.querySelector('#cp-form');
+const name = root.querySelector('#cp-name');
+const sport = root.querySelector('#cp-sport');
+const status = root.querySelector('#cp-status');
+const days = ['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
+let mode = 'edit';
+let selected = {};
+let saved = { name:'ก๊วนตีหลังเลิกงาน', sport:'Badminton', days:{0:['20:00','00:00'],2:['20:00','00:00'],4:['20:00','00:00']} };
+const clone = value => JSON.parse(JSON.stringify(value));
+const prior = window.openai?.widgetState?.privateContent;
+if (prior?.mode === 'create' || prior?.mode === 'edit') mode = prior.mode;
+function persist() {
+  window.openai?.setWidgetState?.({ modelContent:{mode}, privateContent:{mode} }).catch(() => {});
+}
+function renderDays() {
+  const list = root.querySelector('#cp-days');
+  const times = root.querySelector('#cp-times');
+  list.replaceChildren(); times.replaceChildren();
+  days.forEach((day, i) => {
+    const label = document.createElement('label');
+    const check = document.createElement('input'); check.type='checkbox'; check.checked=!!selected[i];
+    label.append(check,document.createTextNode(day)); list.append(label);
+    check.addEventListener('change',() => {if(check.checked) selected[i]=['','']; else delete selected[i]; status.textContent='';renderDays();});
+    if (!selected[i]) return;
+    const row = document.createElement('div');row.className='time-row';
+    const title = document.createElement('span');title.textContent=day;row.append(title);
+    ['เวลาเริ่ม','เวลาจบ'].forEach((text,j) => {
+      const field = document.createElement('label');field.textContent=text;
+      const input = document.createElement('input'); input.type='time';input.required=true;input.value=selected[i][j];input.setAttribute('aria-label',day+' '+text);
+      input.addEventListener('input',()=>{selected[i][j]=input.value;status.textContent='';});field.append(input);row.append(field);
+    }); times.append(row);
+  });
+}
+function reset() {
+  name.value=mode==='edit'?saved.name:'';sport.value=mode==='edit'?saved.sport:'Badminton'; selected=mode==='edit'?clone(saved.days):{};
+  root.querySelector('#cp-title').textContent=mode==='edit'?'แก้ไขข้อมูลก๊วน':'สร้างก๊วนของคุณ';
+  root.querySelector('#cp-description').textContent=mode==='edit'?'อัปเดตชื่อก๊วน กีฬา และตารางเล่นของคุณ':'ตั้งชื่อก๊วน เลือกกีฬา และกำหนดวันนัดเล่น';
+  root.querySelector('#cp-submit').textContent=mode==='edit'?'บันทึกการเปลี่ยนแปลง':'สร้างก๊วน';
+  root.querySelector('#cp-cancel').hidden=mode!=='edit';
+  root.querySelectorAll('[data-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mode===mode)));
+  status.textContent='';renderDays();
+}
+root.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.mode;reset();persist();}));
+root.querySelector('#cp-cancel').addEventListener('click',()=>{reset();status.textContent='ยกเลิกการแก้ไขแล้ว · คืนค่าที่บันทึกไว้ในตัวอย่าง';});
+form.addEventListener('input',()=>{name.setCustomValidity('');status.textContent='';});
+form.addEventListener('submit',event=>{
+  event.preventDefault();
+  if (!name.value.trim()) {name.setCustomValidity('กรุณาระบุชื่อก๊วน');name.reportValidity();return;}
+  saved={name:name.value.trim(),sport:sport.value,days:clone(selected)};
+  const wasCreate=mode==='create';mode='edit';reset();status.textContent=wasCreate?'สร้างก๊วนตัวอย่างแล้ว':'บันทึกตัวอย่างแล้ว · ไม่มีการเปลี่ยนข้อมูลจริง';persist();
+});
+window.addEventListener('openai:set_globals',event=>{const next=event.detail?.globals?.widgetState?.privateContent?.mode;if(next==='create'||next==='edit'){mode=next;reset();}});
+reset();
+})();
+</script>

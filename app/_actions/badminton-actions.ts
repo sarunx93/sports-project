@@ -1,14 +1,17 @@
 'use server'
 
 import type { EndedMatch } from '@/app/_stores/badminton-store'
-import type { Player } from '@/app/_utils/constants'
+import { sports, type Player } from '@/app/_utils/constants'
 import type { PersistedUserProfile } from '@/app/_stores/user-store'
 import type { Sport } from '@/app/_utils/types'
 import { connectMongoose } from '@/app/_lib/mongoose'
 import { validateBadmintonMatch } from '@/app/_utils/badminton-score'
 import MatchModel from '@/models/Match'
 import UserModel from '@/models/User'
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth, currentUser, User } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
+import { normalizeUserProfile } from '@/app/_stores/user-store'
 
 type SessionCountStats = {
     avg: number
@@ -54,6 +57,7 @@ export type CreateUserState = {
     errors: {
         clubName?: string
         sports?: string
+        schedule?: string
     }
 }
 
@@ -152,11 +156,109 @@ export async function recordMatch(match: EndedMatch): Promise<RecordMatchResult>
     }
 }
 
+export async function getUser() {
+    const { userId } = await auth()
+    let fetchedUser
+    if (!userId) {
+        redirect('/login')
+    }
+
+    try {
+        fetchedUser = await UserModel.findOne({ clerkUserId: userId })
+        if (!fetchedUser) {
+            return {
+                ok: false,
+                message: '',
+                errors: { clubName: 'Club name is required.' },
+            }
+        }
+        return {
+            clubName: fetchedUser?.clubName,
+            username: fetchedUser.userName,
+            schedule: (fetchedUser.schedule ?? []).map((session) => ({
+                day: session.day,
+                startTime: session.startTime,
+                endTime: session.endTime,
+            })),
+            sports: fetchedUser.sports,
+        }
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export async function updateUserProfile(prevState: CreateUserState, formData: FormData): Promise<CreateUserState> {
+    const { userId } = await auth()
+
+    if (!userId) {
+        return {
+            ok: false,
+            message: 'กรุณาเข้าสู่ระบบก่อนแก้ไขข้อมูล',
+            userProfile: null,
+            errors: {},
+        }
+    }
+
+    let schedule: unknown
+    const clubName = formData.get('clubName')
+    const sports = formData.get('sports')
+
+    try {
+        schedule = JSON.parse(String(formData.get('schedule') ?? '[]'))
+    } catch {
+        return {
+            ok: false,
+            message: 'กรุณาตรวจสอบตารางเล่น',
+            userProfile: null,
+            errors: {
+                schedule: 'รูปแบบตารางเล่นไม่ถูกต้อง',
+            },
+        }
+    }
+    let userProfile: PersistedUserProfile
+    try {
+        await connectMongoose()
+        const updatedUser = await UserModel.findOneAndUpdate(
+            { clerkUserId: userId },
+            {
+                $set: {
+                    clubName: clubName,
+                    sports: sports,
+                    schedule: schedule,
+                },
+            },
+            {
+                new: true,
+                runValidators: true,
+                upsert: false,
+            },
+        )
+        userProfile = normalizeUserProfile(updatedUser)
+    } catch (error) {
+        console.error('Failed to update user profile:', error)
+
+        return {
+            ok: false,
+            message: 'บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+            userProfile: null,
+            errors: {},
+        }
+    }
+    revalidatePath('/', 'layout')
+
+    return {
+        ok: true,
+        message: 'บันทึกข้อมูลเรียบร้อยแล้ว',
+        userProfile,
+        errors: {},
+    }
+}
+
 export async function createUser(prevState: CreateUserState, formData: FormData) {
     const clubName = String(formData.get('clubName') ?? '').trim()
     const sports = String(formData.get('sports') ?? '').trim() as Sport
     let schedule = formData.get('schedule')
-    console.log(schedule)
+
     try {
         schedule = JSON.parse(String(schedule))
     } catch {
@@ -207,7 +309,7 @@ export async function createUser(prevState: CreateUserState, formData: FormData)
     // Backfill older user documents that were created before the players field existed.
     await UserModel.updateOne({ clerkUserId: userId, players: { $exists: false } }, { $set: { players: [] } })
 
-    await UserModel.findOneAndUpdate(
+    const savedUser = await UserModel.findOneAndUpdate(
         { clerkUserId: userId },
         {
             $set: {
@@ -231,12 +333,7 @@ export async function createUser(prevState: CreateUserState, formData: FormData)
     return {
         ok: true,
         message: 'Club created successfully.',
-        userProfile: {
-            userName,
-            clubName,
-            email,
-            sports,
-        },
+        userProfile: normalizeUserProfile(savedUser),
         errors: {},
     }
 }

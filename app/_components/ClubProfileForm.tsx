@@ -2,27 +2,49 @@
 
 import { useActionState, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createUser, CreateUserState } from '../_actions/badminton-actions'
+import type { CreateUserState } from '../_actions/badminton-actions'
 import { useUserStore } from '../_providers/user-store-provider'
 import Card from './Card'
 import Button from './Button'
 import { DAYS_OF_WEEK } from '../_utils/constant'
+import type { Sport } from '../_utils/types'
+// const initialState: CreateUserState = {
+//     ok: false,
+//     message: '',
+//     userProfile: null,
+//     errors: {},
+// }
 
-const initialState: CreateUserState = {
-    ok: false,
-    message: '',
-    userProfile: null,
-    errors: {},
-}
-type DayName = (typeof DAYS_OF_WEEK)[number]['en']['full']
 type Session = {
     day: string
     startTime: string
     endTime: string
 }
 
-const ClubInput = () => {
-    const [state, formAction, pending] = useActionState(createUser, initialState)
+type ClubValues = {
+    clubName: string
+    sports: Sport
+    schedule: Session[]
+}
+
+export type FormState = CreateUserState
+
+type Props = {
+    mode: 'create' | 'edit'
+    initialValues: ClubValues
+    action: (previousState: FormState, formData: FormData) => Promise<FormState>
+}
+
+const ClubProfileForm = ({ mode, initialValues, action }: Props) => {
+    const isEdit = mode === 'edit'
+    const [values, setValues] = useState(initialValues)
+    const [state, formAction, pending] = useActionState(action, {
+        ok: false,
+        message: '',
+        userProfile: null,
+        errors: {},
+    })
+
     const currentUser = useUserStore((store) => store.currentUser)
     const setUserProfile = useUserStore((store) => store.setUserProfile)
     const router = useRouter()
@@ -40,40 +62,37 @@ const ClubInput = () => {
     }
 
     //set time
-    const setStartTime = (day: string, startTime: string) => {
-        setSchedule((prev) => prev.map((item) => (item.day === day ? { ...item, startTime } : item)))
-    }
-    const setEndTime = (day: string, endTime: string) => {
-        setSchedule((prev) => prev.map((item) => (item.day === day ? { ...item, endTime } : item)))
+    const updateTime = (day: string, field: 'startTime' | 'endTime', value: string) => {
+        setSchedule((prev) => prev.map((item) => (item.day === day ? { ...item, [field]: value } : item)))
     }
 
-    const currentSportHref =
-        currentUser?.sports === 'Badminton'
-            ? '/sports/badminton'
-            : currentUser?.sports === 'Tennis'
-              ? '/sports/tennis'
-              : '/'
+    // const currentSportHref =
+    //     currentUser?.sports === 'Badminton'
+    //         ? '/sports/badminton'
+    //         : currentUser?.sports === 'Tennis'
+    //           ? '/sports/tennis'
+    //           : '/'
     const inputClassName =
         'mt-2 block w-full rounded-2xl border border-[var(--line)] bg-white/90 px-4 py-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--brand-border)] focus:ring-2 focus:ring-[var(--ring)]'
 
-    useEffect(() => {
-        if (state.ok && state.userProfile) {
-            setUserProfile(state.userProfile)
-        }
-    }, [setUserProfile, state.ok, state.userProfile])
+    // useEffect(() => {
+    //     if (state.ok && state.userProfile) {
+    //         setUserProfile(state.userProfile)
+    //     }
+    // }, [setUserProfile, state.ok, state.userProfile])
 
-    useEffect(() => {
-        if (currentUser?.clubName) {
-            router.replace(currentSportHref)
-        }
-    }, [currentSportHref, currentUser?.clubName, router])
+    // useEffect(() => {
+    //     if (currentUser?.clubName) {
+    //         router.replace(currentSportHref)
+    //     }
+    // }, [currentSportHref, currentUser?.clubName, router])
 
     return (
         <Card tone='default' padding='lg' className='mx-auto max-w-4xl'>
             <div className='mb-6'>
                 <p className='text-xs font-semibold uppercase tracking-[0.24em] text-[var(--brand)]'>Club Setup</p>
                 <h1 className='mt-4 text-4xl font-semibold tracking-tight text-[var(--foreground)]'>
-                    Create the club profile that powers your sports pages.
+                    {isEdit ? 'แก้ไขข้อมูลก๊วน' : ' สร้างก๊วนของคุณ'}
                 </h1>
                 <p className='mt-4 max-w-2xl text-base leading-7 text-[var(--muted)]'>
                     Start with the club name and sport focus. The app can then route the user into the correct
@@ -101,6 +120,7 @@ const ClubInput = () => {
                         className={inputClassName}
                         placeholder='Downtown Racquet Club'
                         defaultValue={clubNameDefaultValue}
+                        value={currentUser?.clubName || ''}
                     />
                     {state.errors.clubName ? (
                         <p className='mt-2 text-sm text-[var(--danger)]'>{state.errors.clubName}</p>
@@ -154,8 +174,9 @@ const ClubInput = () => {
                                             type='time'
                                             name='start-time'
                                             onChange={(e) => {
-                                                setStartTime(item.day, e.target.value)
+                                                updateTime(item.day, 'startTime', e.target.value)
                                             }}
+                                            value={item.startTime}
                                             required
                                         />
                                     </div>
@@ -166,8 +187,9 @@ const ClubInput = () => {
                                             type='time'
                                             name='end-time'
                                             onChange={(e) => {
-                                                setEndTime(item.day, e.target.value)
+                                                updateTime(item.day, 'endTime', e.target.value)
                                             }}
+                                            value={item.endTime}
                                             required
                                         />
                                     </div>
@@ -192,4 +214,4 @@ const ClubInput = () => {
     )
 }
 
-export default ClubInput
+export default ClubProfileForm

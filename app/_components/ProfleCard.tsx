@@ -3,14 +3,9 @@ import Link from 'next/link'
 import { useUserStore } from '../_providers/user-store-provider'
 import Card from './Card'
 import { buttonClasses } from './Button'
-import { getClubStats } from '../_actions/badminton-actions'
-import { useEffect } from 'react'
+
 const ProfleCard = () => {
     const currentUser = useUserStore((state) => state.currentUser)
-
-    useEffect(() => {
-        getClubStats()
-    }, [])
 
     return (
         <div className='mx-auto max-w-7xl px-4 py-10 sm:px-6'>
@@ -39,6 +34,9 @@ const ProfleCard = () => {
                                 href='/sports/badminton/all-matches'
                                 className={buttonClasses({ variant: 'secondary', size: 'lg' })}>
                                 ดู Match ที่กำลังเล่นอยู่
+                            </Link>
+                            <Link href='/edit-profile' className={buttonClasses({ variant: 'secondary', size: 'lg' })}>
+                                แก้ไขข้อมูลก๊วน
                             </Link>
                         </div>
                     </div>
